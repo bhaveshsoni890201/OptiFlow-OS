@@ -40,7 +40,8 @@ class TrainingService extends BaseService {
 const trainingService = new TrainingService()
 
 export const getTrainingAssignments = () => trainingService.getTrainingAssignments()
-export const getTrainingContent = (contentId: string) => trainingService.getTrainingContent(contentId)
+export const getTrainingContent = (contentId: string) =>
+  trainingService.getTrainingContent(contentId)
 export const updateTrainingProgress = (id: string, status: 'in_progress' | 'completed') =>
   trainingService.updateTrainingProgress(id, status)
 export const markTrainingComplete = (id: string) => trainingService.markTrainingComplete(id)

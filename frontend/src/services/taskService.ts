@@ -38,7 +38,11 @@ class TaskService extends BaseService {
     )
   }
 
-  async getAllTasks(): Promise<{ delegation: DelegationTask[]; checklist: ChecklistItem[]; fms: FMSTask[] }> {
+  async getAllTasks(): Promise<{
+    delegation: DelegationTask[]
+    checklist: ChecklistItem[]
+    fms: FMSTask[]
+  }> {
     const [delegation, checklist, fms] = await Promise.all([
       this.getDelegationTasks(),
       this.getChecklistTasks(),
@@ -63,4 +67,5 @@ export const getChecklistTasks = () => taskService.getChecklistTasks()
 export const getFMSTasks = () => taskService.getFMSTasks()
 export const getAllTasks = () => taskService.getAllTasks()
 export const createTask = (task: Task) => taskService.createTask(task)
-export const updateTaskStatus = (taskId: string, type: TaskType, status: TaskStatus) => taskService.updateTaskStatus(taskId, type, status)
+export const updateTaskStatus = (taskId: string, type: TaskType, status: TaskStatus) =>
+  taskService.updateTaskStatus(taskId, type, status)

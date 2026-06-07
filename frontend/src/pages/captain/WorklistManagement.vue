@@ -197,10 +197,7 @@ onMounted(loadWorklists)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadWorklists()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadWorklists()">
           Retry
         </button>
       </div>

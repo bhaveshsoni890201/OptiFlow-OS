@@ -31,7 +31,11 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const statusFilter = ref<string>('open')
 const categoryFilter = ref<string>('all')
-const { immediate: employeeInput, debounced: employeeSearch, clear: clearSearch } = useDebouncedSearch(300)
+const {
+  immediate: employeeInput,
+  debounced: employeeSearch,
+  clear: clearSearch,
+} = useDebouncedSearch(300)
 const expandedTicket = ref<string | null>(null)
 const newCommentText = ref('')
 const selectedCategory = ref<string>('all')
@@ -77,7 +81,9 @@ const filteredTickets = computed(() => {
     result = result.filter((t) => {
       const emp = employees.find((e) => e.employee_id === t.raised_by)
       const name = emp?.name.toLowerCase() || ''
-      return t.subject.toLowerCase().includes(q) || name.includes(q) || t.id.toLowerCase().includes(q)
+      return (
+        t.subject.toLowerCase().includes(q) || name.includes(q) || t.id.toLowerCase().includes(q)
+      )
     })
   }
   return result
@@ -94,7 +100,9 @@ const {
 watch(filteredTickets, () => ticketsGoTo(1))
 
 const openCount = computed(() => ticketStore.tickets.filter((t) => t.status === 'open').length)
-const doerOptions = computed(() => adminStore.employees.filter((e) => e.roles.includes('doer') && e.status === 'active'))
+const doerOptions = computed(() =>
+  adminStore.employees.filter((e) => e.roles.includes('doer') && e.status === 'active'),
+)
 
 function getEmployeeName(employeeId: string): string {
   const emp = adminStore.employees.find((e) => e.employee_id === employeeId)
@@ -103,7 +111,12 @@ function getEmployeeName(employeeId: string): string {
 
 function getEmployeeInitials(employeeId: string): string {
   const name = getEmployeeName(employeeId)
-  return name.split(' ').map((s) => s[0]).join('').slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .map((s) => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 function toggleExpand(id: string) {
@@ -112,7 +125,9 @@ function toggleExpand(id: string) {
 
 function handleAddComment(ticket: HelpTicket) {
   if (!newCommentText.value.trim()) return
-  const captain = adminStore.employees.find((e) => e.employee_id === rootStore.user?.employee?.employee_id)
+  const captain = adminStore.employees.find(
+    (e) => e.employee_id === rootStore.user?.employee?.employee_id,
+  )
   const captainName = captain?.name || 'Captain'
   ticketStore.addComment(ticket.id, captainName, newCommentText.value.trim())
   newCommentText.value = ''
@@ -125,7 +140,11 @@ function openCloseModal(ticket: HelpTicket) {
 function confirmClose() {
   if (!closeModal.value) return
   ticketStore.resolveTicket(closeModal.value.ticket.id, closeModal.value.notes)
-  rootStore.addToast({ type: 'success', message: 'Ticket resolved — pending admin review', duration: 3000 })
+  rootStore.addToast({
+    type: 'success',
+    message: 'Ticket resolved — pending admin review',
+    duration: 3000,
+  })
   closeModal.value = null
 }
 
@@ -160,10 +179,7 @@ async function loadTickets() {
   loading.value = true
   error.value = null
   try {
-    await Promise.all([
-      ticketStore.fetchTickets(),
-      adminStore.fetchEmployees(),
-    ])
+    await Promise.all([ticketStore.fetchTickets(), adminStore.fetchEmployees()])
   } catch {
     error.value = 'Failed to load tickets'
   } finally {
@@ -189,10 +205,7 @@ onMounted(loadTickets)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadTickets()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadTickets()">
           Retry
         </button>
       </div>
@@ -273,16 +286,21 @@ onMounted(loadTickets)
               </div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1">
-                  <h3 class="text-sm font-semibold text-slate-900 truncate">{{ ticket.subject }}</h3>
+                  <h3 class="text-sm font-semibold text-slate-900 truncate">
+                    {{ ticket.subject }}
+                  </h3>
                   <span
                     class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border capitalize"
                     :class="categoryColors[ticket.category.toLowerCase()] || categoryColors.other"
-                  >{{ ticket.category }}</span>
+                    >{{ ticket.category }}</span
+                  >
                 </div>
                 <div class="flex items-center gap-3 text-xs text-slate-400">
                   <span>{{ getEmployeeName(ticket.raised_by) }}</span>
                   <span>{{ formatDateShort(ticket.created_on) }}</span>
-                    <span :class="priorityColors[ticket.priority]" class="font-medium capitalize">{{ ticket.priority }}</span>
+                  <span :class="priorityColors[ticket.priority]" class="font-medium capitalize">{{
+                    ticket.priority
+                  }}</span>
                   <span v-if="ticket.attachments?.length" class="inline-flex items-center gap-0.5">
                     <PaperClipIcon class="w-3 h-3" /> {{ ticket.attachments.length }}
                   </span>
@@ -319,7 +337,9 @@ onMounted(loadTickets)
                 {{ ticket.status.replace('_', ' ') }}
               </span>
               <span class="text-slate-400">|</span>
-              <span :class="priorityColors[ticket.priority]" class="font-medium capitalize">{{ ticket.priority }} priority</span>
+              <span :class="priorityColors[ticket.priority]" class="font-medium capitalize"
+                >{{ ticket.priority }} priority</span
+              >
             </div>
 
             <!-- Comment thread -->
@@ -331,12 +351,21 @@ onMounted(loadTickets)
                 <div
                   class="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-700 shrink-0"
                 >
-                  {{ c.author.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() }}
+                  {{
+                    c.author
+                      .split(' ')
+                      .map((s) => s[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
+                  }}
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-medium text-slate-900">{{ c.author }}</span>
-                    <span class="text-[10px] text-slate-400">{{ formatDateTime(c.created_on) }}</span>
+                    <span class="text-[10px] text-slate-400">{{
+                      formatDateTime(c.created_on)
+                    }}</span>
                   </div>
                   <p class="text-xs text-slate-600 mt-0.5">{{ c.text }}</p>
                 </div>
@@ -370,7 +399,13 @@ onMounted(loadTickets)
               <p v-if="ticket.resolved_on" class="text-xs text-emerald-500 mt-1">
                 Resolved {{ formatDateTime(ticket.resolved_on) }}
                 <span v-if="ticket.created_on">
-                  ({{ Math.round((new Date(ticket.resolved_on).getTime() - new Date(ticket.created_on).getTime()) / 3600000) }}h to resolve)
+                  ({{
+                    Math.round(
+                      (new Date(ticket.resolved_on).getTime() -
+                        new Date(ticket.created_on).getTime()) /
+                        3600000,
+                    )
+                  }}h to resolve)
                 </span>
               </p>
             </div>
@@ -409,22 +444,28 @@ onMounted(loadTickets)
           </div>
         </div>
 
-        <OptEmptyState v-if="filteredTickets.length === 0" type="search" title="No tickets match your filters" />
+        <OptEmptyState
+          v-if="filteredTickets.length === 0"
+          type="search"
+          title="No tickets match your filters"
+        />
 
-      <OptPagination
-        :current-page="ticketsCurrentPage"
-        :total-pages="ticketsTotalPages"
-        :total-items="ticketsTotalItems"
-        :page-size="20"
-        @page-change="ticketsCurrentPage = $event"
-      />
+        <OptPagination
+          :current-page="ticketsCurrentPage"
+          :total-pages="ticketsTotalPages"
+          :total-items="ticketsTotalItems"
+          :page-size="20"
+          @page-change="ticketsCurrentPage = $event"
+        />
+      </div>
     </div>
-  </div>
 
     <!-- Resolve Modal -->
     <div v-if="closeModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div class="fixed inset-0 bg-black/40" @click="closeModal = null" />
-      <div class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div
+        class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl"
+      >
         <h3 class="text-sm font-semibold text-slate-900">Resolve Ticket</h3>
         <p class="text-xs text-slate-500">Add resolution notes. Admin will review and close.</p>
         <textarea
@@ -434,8 +475,18 @@ onMounted(loadTickets)
           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
         />
         <div class="flex justify-end gap-2">
-          <button class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50" @click="closeModal = null">Cancel</button>
-          <button class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700" @click="confirmClose">Resolve</button>
+          <button
+            class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            @click="closeModal = null"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700"
+            @click="confirmClose"
+          >
+            Resolve
+          </button>
         </div>
       </div>
     </div>
@@ -443,7 +494,9 @@ onMounted(loadTickets)
     <!-- Assign Modal -->
     <div v-if="assignModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div class="fixed inset-0 bg-black/40" @click="assignModal = null" />
-      <div class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div
+        class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl"
+      >
         <h3 class="text-sm font-semibold text-slate-900">Assign Ticket</h3>
         <p class="text-xs text-slate-500">Select a team member to assign this ticket.</p>
         <select
@@ -451,11 +504,23 @@ onMounted(loadTickets)
           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
         >
           <option value="" disabled>Select doer...</option>
-          <option v-for="d in doerOptions" :key="d.employee_id" :value="d.employee_id">{{ d.name }} ({{ d.employee_id }})</option>
+          <option v-for="d in doerOptions" :key="d.employee_id" :value="d.employee_id">
+            {{ d.name }} ({{ d.employee_id }})
+          </option>
         </select>
         <div class="flex justify-end gap-2">
-          <button class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50" @click="assignModal = null">Cancel</button>
-          <button class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700" @click="confirmAssign">Assign</button>
+          <button
+            class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            @click="assignModal = null"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+            @click="confirmAssign"
+          >
+            Assign
+          </button>
         </div>
       </div>
     </div>
@@ -463,7 +528,9 @@ onMounted(loadTickets)
     <!-- Escalate Modal -->
     <div v-if="escalateModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div class="fixed inset-0 bg-black/40" @click="escalateModal = null" />
-      <div class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl">
+      <div
+        class="relative bg-white rounded-2xl border border-slate-200 w-full max-w-md p-5 space-y-4 shadow-2xl"
+      >
         <h3 class="text-sm font-semibold text-slate-900">Escalate to Admin</h3>
         <p class="text-xs text-slate-500">Provide a reason for escalation.</p>
         <textarea
@@ -473,8 +540,18 @@ onMounted(loadTickets)
           class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
         />
         <div class="flex justify-end gap-2">
-          <button class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50" @click="escalateModal = null">Cancel</button>
-          <button class="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700" @click="confirmEscalate">Escalate</button>
+          <button
+            class="px-4 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
+            @click="escalateModal = null"
+          >
+            Cancel
+          </button>
+          <button
+            class="px-4 py-2 rounded-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700"
+            @click="confirmEscalate"
+          >
+            Escalate
+          </button>
         </div>
       </div>
     </div>

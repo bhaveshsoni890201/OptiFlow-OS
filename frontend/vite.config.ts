@@ -35,8 +35,16 @@ export default defineConfig({
           if (id.includes('/pages/admin/AdminDashboard')) return 'page-admin-dash'
           if (id.includes('/pages/admin/InsightsOverview')) return 'page-admin-insights'
           if (id.includes('/pages/admin/WeeklyReviewView')) return 'page-admin-weekly'
-          if (id.includes('/pages/admin/AdminTicketsView') || id.includes('/pages/admin/AdminTicketDetail')) return 'page-admin-tickets'
-          if (id.includes('/pages/admin/Doer360View') || id.includes('/pages/admin/CaptainIndexView')) return 'page-admin-360'
+          if (
+            id.includes('/pages/admin/AdminTicketsView') ||
+            id.includes('/pages/admin/AdminTicketDetail')
+          )
+            return 'page-admin-tickets'
+          if (
+            id.includes('/pages/admin/Doer360View') ||
+            id.includes('/pages/admin/CaptainIndexView')
+          )
+            return 'page-admin-360'
           if (id.includes('/pages/admin/EmployeeDetail')) return 'page-admin-empdetail'
           if (id.includes('/pages/admin/AdminLeaveView')) return 'page-admin-leave'
           if (id.includes('/pages/admin/AdminTrainingView')) return 'page-admin-training'

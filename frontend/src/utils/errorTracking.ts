@@ -2,7 +2,10 @@ import { logger } from './logger'
 
 // ─── Types ───────────────────────────────────────────────────────
 interface SentryLike {
-  captureException: (error: Error, options?: { tags?: Record<string, string | undefined>; extra?: Record<string, unknown> }) => void
+  captureException: (
+    error: Error,
+    options?: { tags?: Record<string, string | undefined>; extra?: Record<string, unknown> },
+  ) => void
   captureMessage: (message: string, level?: string) => void
   setUser: (user: { id?: string } | null) => void
 }
@@ -46,9 +49,12 @@ function isThrottled(key: string): boolean {
   }
 
   entry.count++
-  if (entry.count > THROTTLE_MAX && (now - entry.firstSeen) < THROTTLE_WINDOW_MS) {
+  if (entry.count > THROTTLE_MAX && now - entry.firstSeen < THROTTLE_WINDOW_MS) {
     if (entry.count === THROTTLE_MAX + 1) {
-      logger.warn('ErrorTracking', `Error suppressed: "${key}" — ${THROTTLE_MAX}+ occurrences in 30s`)
+      logger.warn(
+        'ErrorTracking',
+        `Error suppressed: "${key}" — ${THROTTLE_MAX}+ occurrences in 30s`,
+      )
     }
     return true
   }
@@ -138,7 +144,9 @@ export async function initErrorTracking(): Promise<void> {
           try {
             const url = new URL(event.request.url)
             event.request.url = `${url.origin}${url.pathname}`
-          } catch { /* keep as-is */ }
+          } catch {
+            /* keep as-is */
+          }
         }
         if (event.user) {
           event.user = { id: 'sanitized' }
@@ -174,14 +182,24 @@ function buildEvent(
   }
 }
 
-export function captureError(error: Error | string, context?: string, extra?: Record<string, unknown>): void {
+export function captureError(
+  error: Error | string,
+  context?: string,
+  extra?: Record<string, unknown>,
+): void {
   const message = typeof error === 'string' ? error : error.message
   const key = errorKey(message, context)
 
   if (isThrottled(key)) return
   if (isGloballyRateLimited()) return
 
-  const event = buildEvent(message, 'error', context, typeof error !== 'string' ? error.stack : undefined, extra)
+  const event = buildEvent(
+    message,
+    'error',
+    context,
+    typeof error !== 'string' ? error.stack : undefined,
+    extra,
+  )
   bufferEvent(event)
   logger.error(context || 'ErrorTracking', message, { stack: event.stack, extra })
 
@@ -193,7 +211,11 @@ export function captureError(error: Error | string, context?: string, extra?: Re
   }
 }
 
-export function captureWarning(message: string, context?: string, extra?: Record<string, unknown>): void {
+export function captureWarning(
+  message: string,
+  context?: string,
+  extra?: Record<string, unknown>,
+): void {
   const key = errorKey(message, context)
 
   if (isThrottled(key)) return

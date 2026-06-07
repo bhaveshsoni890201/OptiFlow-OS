@@ -1,11 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import {
-  MagnifyingGlassIcon,
-  FunnelIcon,
-  ExclamationTriangleIcon,
-} from '@heroicons/vue/24/outline'
+import { MagnifyingGlassIcon, FunnelIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import { useAdminStore } from '../../stores/adminStore'
 import type { Employee } from '../../types'
 import OptEmptyState from '../../components/common/OptEmptyState.vue'
@@ -38,7 +34,11 @@ const statusConfig: Record<string, { label: string; color: string; dot: string }
     color: 'text-emerald-700 bg-emerald-50 border-emerald-200',
     dot: 'bg-emerald-500',
   },
-  inactive: { label: 'Inactive', color: 'text-red-700 bg-red-50 border-red-200', dot: 'bg-red-500' },
+  inactive: {
+    label: 'Inactive',
+    color: 'text-red-700 bg-red-50 border-red-200',
+    dot: 'bg-red-500',
+  },
 }
 
 const filteredMembers = computed(() => {
@@ -49,7 +49,10 @@ const filteredMembers = computed(() => {
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase()
     result = result.filter(
-      (m) => m.name.toLowerCase().includes(q) || m.designation.toLowerCase().includes(q) || m.department.toLowerCase().includes(q),
+      (m) =>
+        m.name.toLowerCase().includes(q) ||
+        m.designation.toLowerCase().includes(q) ||
+        m.department.toLowerCase().includes(q),
     )
   }
   return result
@@ -59,21 +62,27 @@ const totalActiveTasks = computed(() => members.value.reduce((s, m) => s + m.act
 const totalDelays = computed(() => members.value.reduce((s, m) => s + m.delays, 0))
 
 function buildMembers(employees: Employee[]): TeamMemberDisplay[] {
-  return employees.filter((e) => e.roles.includes('doer')).map((e) => {
-    const nameParts = e.name.split(' ')
-    const initials = nameParts.map((s) => s[0]).join('').slice(0, 2).toUpperCase()
-    return {
-      id: e.employee_id,
-      name: e.name,
-      initials,
-      designation: e.designation,
-      department: e.department,
-      status: e.status,
-      activeTasks: 0,
-      delays: 0,
-      trainingCompletion: 0,
-    }
-  })
+  return employees
+    .filter((e) => e.roles.includes('doer'))
+    .map((e) => {
+      const nameParts = e.name.split(' ')
+      const initials = nameParts
+        .map((s) => s[0])
+        .join('')
+        .slice(0, 2)
+        .toUpperCase()
+      return {
+        id: e.employee_id,
+        name: e.name,
+        initials,
+        designation: e.designation,
+        department: e.department,
+        status: e.status === 'active' ? 'active' : 'inactive',
+        activeTasks: 0,
+        delays: 0,
+        trainingCompletion: 0,
+      }
+    })
 }
 
 async function loadRoster() {
@@ -107,10 +116,7 @@ onMounted(loadRoster)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadRoster()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadRoster()">
           Retry
         </button>
       </div>
@@ -135,11 +141,15 @@ onMounted(loadRoster)
           <p class="text-xs text-slate-500">Total Members</p>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 p-3 text-center">
-          <p class="text-2xl font-bold text-amber-600">{{ members.filter((m) => m.status === 'active').length }}</p>
+          <p class="text-2xl font-bold text-amber-600">
+            {{ members.filter((m) => m.status === 'active').length }}
+          </p>
           <p class="text-xs text-slate-500">Active</p>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 p-3 text-center">
-          <p class="text-2xl font-bold text-red-600">{{ members.filter((m) => m.status === 'inactive').length }}</p>
+          <p class="text-2xl font-bold text-red-600">
+            {{ members.filter((m) => m.status === 'inactive').length }}
+          </p>
           <p class="text-xs text-slate-500">Inactive</p>
         </div>
         <div class="bg-white rounded-xl border border-slate-200 p-3 text-center">
@@ -234,7 +244,10 @@ onMounted(loadRoster)
               <td class="px-4 py-3 text-center">
                 <span
                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border"
-                  :class="statusConfig[member.status]?.color || 'bg-slate-100 text-slate-700 border-slate-200'"
+                  :class="
+                    statusConfig[member.status]?.color ||
+                    'bg-slate-100 text-slate-700 border-slate-200'
+                  "
                 >
                   <span
                     class="w-1.5 h-1.5 rounded-full"
@@ -304,7 +317,9 @@ onMounted(loadRoster)
             </div>
             <span
               class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border"
-              :class="statusConfig[member.status]?.color || 'bg-slate-100 text-slate-700 border-slate-200'"
+              :class="
+                statusConfig[member.status]?.color || 'bg-slate-100 text-slate-700 border-slate-200'
+              "
             >
               <span
                 class="w-1.5 h-1.5 rounded-full"
@@ -338,7 +353,11 @@ onMounted(loadRoster)
         </div>
       </div>
 
-      <OptEmptyState v-if="filteredMembers.length === 0" type="team" title="No members match your filters" />
+      <OptEmptyState
+        v-if="filteredMembers.length === 0"
+        type="team"
+        title="No members match your filters"
+      />
     </div>
   </div>
 </template>

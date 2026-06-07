@@ -133,10 +133,7 @@ watch(
                   ]"
                 >
                   <ExclamationTriangleIcon
-                    :class="[
-                      'w-7 h-7',
-                      confirmDanger ? 'text-danger-600' : 'text-brand-600',
-                    ]"
+                    :class="['w-7 h-7', confirmDanger ? 'text-danger-600' : 'text-brand-600']"
                   />
                 </div>
                 <DialogTitle as="h2" class="text-h2 text-neutral-900 m-0">
@@ -179,11 +176,7 @@ watch(
                 v-if="variant === 'confirm'"
                 class="flex items-center justify-end gap-3 px-6 py-4 border-t border-neutral-200 shrink-0"
               >
-                <OptButton
-                  variant="ghost"
-                  :disabled="loading"
-                  @click="handleCancel"
-                >
+                <OptButton variant="ghost" :disabled="loading" @click="handleCancel">
                   {{ cancelLabel }}
                 </OptButton>
                 <OptButton

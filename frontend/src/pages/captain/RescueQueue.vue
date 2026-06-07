@@ -55,7 +55,12 @@ const escalationColors = [
   'bg-red-100 text-red-700',
 ]
 
-const severityOrder: Record<string, number> = { soft: 0, warning: 1, high_risk: 2, admin_escalation: 3 }
+const severityOrder: Record<string, number> = {
+  soft: 0,
+  warning: 1,
+  high_risk: 2,
+  admin_escalation: 3,
+}
 
 const tabCounts = computed(() => {
   const all = rescueStore.records.length
@@ -102,7 +107,12 @@ const {
 watch(filteredRecords, () => recordsGoTo(1))
 
 function initials(name: string): string {
-  return name.split(' ').map((s) => s[0]).join('').slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .map((s) => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 async function handleRemind(record: RescueRecord) {
@@ -156,10 +166,7 @@ onMounted(loadQueue)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadQueue()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadQueue()">
           Retry
         </button>
       </div>
@@ -170,7 +177,9 @@ onMounted(loadQueue)
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">Rescue</h1>
-          <p class="text-sm text-slate-500">{{ rescueStore.records.length }} tasks need attention</p>
+          <p class="text-sm text-slate-500">
+            {{ rescueStore.records.length }} tasks need attention
+          </p>
         </div>
       </div>
 
@@ -225,7 +234,12 @@ onMounted(loadQueue)
         </div>
       </div>
 
-      <OptEmptyState v-if="filteredRecords.length === 0" type="tasks" title="No tasks need rescue right now" description="Everything is on track. Great leadership!" />
+      <OptEmptyState
+        v-if="filteredRecords.length === 0"
+        type="tasks"
+        title="No tasks need rescue right now"
+        description="Everything is on track. Great leadership!"
+      />
 
       <!-- Rescue Cards -->
       <div v-else class="space-y-3">
@@ -279,10 +293,15 @@ onMounted(loadQueue)
                   class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border"
                   :class="severityColorMap[record.severity ?? '']"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="severityDotMap[record.severity ?? '']" />
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    :class="severityDotMap[record.severity ?? '']"
+                  />
                   {{ (record.severity || 'unknown').replace('_', ' ') }}
                 </span>
-                <p class="text-xs text-slate-400">Last: {{ formatRelativeTime(record.last_activity) }}</p>
+                <p class="text-xs text-slate-400">
+                  Last: {{ formatRelativeTime(record.last_activity) }}
+                </p>
                 <p class="text-xs text-slate-400">
                   {{ record.reminder_count }} reminder{{ record.reminder_count !== 1 ? 's' : '' }}
                 </p>
@@ -301,14 +320,18 @@ onMounted(loadQueue)
                     v-for="level in 4"
                     :key="level"
                     class="w-2 h-2 rounded-full transition-colors"
-                    :class="level - 1 <= (severityOrder[record.severity ?? ''] ?? 0) ? 'bg-red-500' : 'bg-slate-200'"
+                    :class="
+                      level - 1 <= (severityOrder[record.severity ?? ''] ?? 0)
+                        ? 'bg-red-500'
+                        : 'bg-slate-200'
+                    "
                   />
                 </div>
                 <span
                   class="text-xs font-medium px-2 py-0.5 rounded-full"
-                  :class="escalationColors[(severityOrder[record.severity ?? ''] ?? 0)]"
+                  :class="escalationColors[severityOrder[record.severity ?? ''] ?? 0]"
                 >
-                  {{ escalationLabels[(severityOrder[record.severity ?? ''] ?? 0)] }}
+                  {{ escalationLabels[severityOrder[record.severity ?? ''] ?? 0] }}
                 </span>
               </div>
             </div>

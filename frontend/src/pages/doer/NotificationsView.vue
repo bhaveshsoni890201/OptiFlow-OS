@@ -62,7 +62,9 @@ async function fetchNotifications() {
     await notificationStore.fetch()
     if (timedOut.value) throw new Error('Request timed out')
   } catch {
-    error.value = timedOut.value ? 'Request timed out. Please try again.' : t('notificationsPage.loadError')
+    error.value = timedOut.value
+      ? 'Request timed out. Please try again.'
+      : t('notificationsPage.loadError')
   }
   clearLoadTimeout()
   loading.value = false
@@ -141,7 +143,12 @@ function handleMarkAllRead() {
   </div>
 
   <!-- Error state -->
-  <div v-else-if="error" class="bg-white rounded-lg shadow-card p-8 text-center" role="alert" aria-live="polite">
+  <div
+    v-else-if="error"
+    class="bg-white rounded-lg shadow-card p-8 text-center"
+    role="alert"
+    aria-live="polite"
+  >
     <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
     <p class="text-body-strong text-neutral-900 mb-1">{{ $t('notificationsPage.failedToLoad') }}</p>
     <p class="text-body text-neutral-500">{{ error }}</p>
@@ -212,7 +219,9 @@ function handleMarkAllRead() {
               </p>
               <p class="text-caption text-neutral-500 mt-0.5">{{ typeLabel(item.type) }}</p>
             </div>
-            <span class="text-caption text-neutral-400 shrink-0 whitespace-nowrap">{{ formatDateTime(item.timestamp) }}</span>
+            <span class="text-caption text-neutral-400 shrink-0 whitespace-nowrap">{{
+              formatDateTime(item.timestamp)
+            }}</span>
           </div>
           <p class="text-body text-neutral-600 mt-1.5 line-clamp-2">{{ item.context }}</p>
           <div class="flex items-center gap-3 mt-2">

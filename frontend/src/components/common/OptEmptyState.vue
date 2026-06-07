@@ -14,7 +14,18 @@ import {
 
 const props = withDefaults(
   defineProps<{
-    type?: 'tasks' | 'data' | 'search' | 'error' | 'success' | 'leave' | 'comments' | 'attendance' | 'team' | 'training' | 'generic'
+    type?:
+      | 'tasks'
+      | 'data'
+      | 'search'
+      | 'error'
+      | 'success'
+      | 'leave'
+      | 'comments'
+      | 'attendance'
+      | 'team'
+      | 'training'
+      | 'generic'
     title?: string
     description?: string
     actionLabel?: string
@@ -67,10 +78,7 @@ const defaultDescriptions: Record<string, string> = {
 <template>
   <div class="flex flex-col items-center justify-center py-12 text-center">
     <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-      <component
-        :is="iconMap[type]"
-        class="w-8 h-8 text-slate-400"
-      />
+      <component :is="iconMap[type]" class="w-8 h-8 text-slate-400" />
     </div>
     <h3 class="text-base font-semibold text-slate-900 mb-1">
       {{ title || defaultTitles[type] || 'No data available' }}

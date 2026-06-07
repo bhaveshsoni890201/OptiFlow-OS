@@ -60,14 +60,14 @@ onUnmounted(stopCountdown)
       <span class="flex-1">
         You're offline
         <span v-if="offlineStore.pendingCount > 0">
-          — {{ offlineStore.pendingCount }} pending change{{ offlineStore.pendingCount > 1 ? 's' : '' }} &middot; retry in {{ countdown }}s
+          — {{ offlineStore.pendingCount }} pending change{{
+            offlineStore.pendingCount > 1 ? 's' : ''
+          }}
+          &middot; retry in {{ countdown }}s
         </span>
         <span v-else>— changes will be saved locally</span>
       </span>
-      <span
-        v-if="offlineStore.pendingCount > 0"
-        class="flex items-center gap-1 text-sm"
-      >
+      <span v-if="offlineStore.pendingCount > 0" class="flex items-center gap-1 text-sm">
         <ArrowPathIcon class="h-4 w-4 animate-spin" />
       </span>
       <button

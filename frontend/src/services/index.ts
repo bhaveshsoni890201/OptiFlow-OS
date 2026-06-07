@@ -1,11 +1,6 @@
 export { isMockMode } from './config'
 
-export {
-  getEmployees,
-  createEmployee,
-  updateEmployee,
-  deleteEmployee,
-} from './employeeService'
+export { getEmployees, createEmployee, updateEmployee, deleteEmployee } from './employeeService'
 
 export {
   getDelegationTasks,
@@ -45,14 +40,9 @@ export {
   escalateTicket,
 } from './ticketService'
 
-export {
-  getTrainingAssignments,
-  getTrainingContent,
-} from './trainingService'
+export { getTrainingAssignments, getTrainingContent } from './trainingService'
 
-export {
-  getWorklists,
-} from './worklistService'
+export { getWorklists } from './worklistService'
 
 export {
   getNotifications,
@@ -60,13 +50,7 @@ export {
   markAllNotificationsRead,
 } from './notificationService'
 
-export {
-  login,
-  verifyOtp,
-  getProfile,
-  forgotPassword,
-  resetPassword,
-} from './authService'
+export { login, verifyOtp, getProfile, forgotPassword, resetPassword } from './authService'
 
 export {
   getRescueRecords,
@@ -76,15 +60,6 @@ export {
   resolveRescue,
 } from './rescueService'
 
-export {
-  getDepartments,
-  createDepartment,
-  updateDepartment,
-} from './departmentService'
+export { getDepartments, createDepartment, updateDepartment } from './departmentService'
 
-export {
-  subscribe,
-  connectSSE,
-  connectWebSocket,
-  disconnect,
-} from './realtimeService'
+export { subscribe, connectSSE, connectWebSocket, disconnect } from './realtimeService'

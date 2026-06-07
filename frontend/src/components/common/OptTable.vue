@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { ChevronUpIcon, ChevronDownIcon, ChevronRightIcon, ChevronDownIcon as ChevronDownSm } from '@heroicons/vue/20/solid'
+import {
+  ChevronUpIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  ChevronDownIcon as ChevronDownSm,
+} from '@heroicons/vue/20/solid'
 import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline'
 import OptSpinner from './OptSpinner.vue'
 import OptButton from './OptButton.vue'
@@ -61,6 +66,7 @@ const emit = defineEmits<{
   select: [row: any]
   expand: [row: any]
   'row-click': [row: any]
+  retry: []
 }>()
 
 const sortKey = ref('')
@@ -120,25 +126,17 @@ function onPageChange(page: number) {
 
 <template>
   <div class="opt-table w-full">
-    <div
-      v-if="loading"
-      class="flex items-center justify-center py-16"
-    >
+    <div v-if="loading" class="flex items-center justify-center py-16">
       <OptSpinner size="lg" />
     </div>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center justify-center py-16 text-center"
-    >
+    <div v-else-if="error" class="flex flex-col items-center justify-center py-16 text-center">
       <div class="w-12 h-12 rounded-full bg-danger-50 flex items-center justify-center mb-4">
         <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
       </div>
       <p class="text-body-strong text-neutral-700 mb-1">Failed to load data</p>
       <p class="text-caption text-neutral-500 mb-4">{{ error }}</p>
-      <OptButton variant="secondary" size="sm" @click="$emit('retry')">
-        Retry
-      </OptButton>
+      <OptButton variant="secondary" size="sm" @click="$emit('retry')"> Retry </OptButton>
     </div>
 
     <div
@@ -150,21 +148,34 @@ function onPageChange(page: number) {
     </div>
 
     <template v-else>
-      <div :class="['overflow-x-auto rounded-lg border border-neutral-200', stickyHeader ? 'max-h-[600px] overflow-y-auto' : '']">
+      <div
+        :class="[
+          'overflow-x-auto rounded-lg border border-neutral-200',
+          stickyHeader ? 'max-h-[600px] overflow-y-auto' : '',
+        ]"
+      >
         <table class="w-full border-collapse">
-          <thead :class="[stickyHeader ? 'sticky top-0 z-10' : '', compact ? 'bg-neutral-50' : 'bg-neutral-50']">
+          <thead
+            :class="[
+              stickyHeader ? 'sticky top-0 z-10' : '',
+              compact ? 'bg-neutral-50' : 'bg-neutral-50',
+            ]"
+          >
             <tr>
-              <th
-                v-if="expandable"
-                class="w-10 px-3 py-3 text-left"
-              />
+              <th v-if="expandable" class="w-10 px-3 py-3 text-left" />
               <th
                 v-for="col in columns"
                 :key="col.key"
                 :class="[
                   'text-overline text-neutral-500 tracking-wide',
-                  col.sortable || sortable ? 'cursor-pointer select-none hover:text-neutral-700' : '',
-                  col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left',
+                  col.sortable || sortable
+                    ? 'cursor-pointer select-none hover:text-neutral-700'
+                    : '',
+                  col.align === 'center'
+                    ? 'text-center'
+                    : col.align === 'right'
+                      ? 'text-right'
+                      : 'text-left',
                   compact ? 'px-3 py-2' : 'px-4 py-3',
                   col.width ? `w-[${col.width}]` : '',
                 ]"
@@ -173,14 +184,8 @@ function onPageChange(page: number) {
                 <div class="inline-flex items-center gap-1">
                   {{ col.label }}
                   <span v-if="sortKey === col.key" class="inline-flex">
-                    <ChevronUpIcon
-                      v-if="sortDir === 'asc'"
-                      class="w-3.5 h-3.5 text-brand-600"
-                    />
-                    <ChevronDownIcon
-                      v-else
-                      class="w-3.5 h-3.5 text-brand-600"
-                    />
+                    <ChevronUpIcon v-if="sortDir === 'asc'" class="w-3.5 h-3.5 text-brand-600" />
+                    <ChevronDownIcon v-else class="w-3.5 h-3.5 text-brand-600" />
                   </span>
                 </div>
               </th>
@@ -214,14 +219,8 @@ function onPageChange(page: number) {
                   class="text-neutral-400 hover:text-neutral-600 transition-colors"
                   :aria-label="'Expand row'"
                 >
-                  <ChevronRightIcon
-                    v-if="!expandedRows.has(row[rowKey])"
-                    class="w-4 h-4"
-                  />
-                  <ChevronDownSm
-                    v-else
-                    class="w-4 h-4"
-                  />
+                  <ChevronRightIcon v-if="!expandedRows.has(row[rowKey])" class="w-4 h-4" />
+                  <ChevronDownSm v-else class="w-4 h-4" />
                 </button>
               </td>
               <td
@@ -229,31 +228,26 @@ function onPageChange(page: number) {
                 :key="`${row[rowKey] || rowIdx}-${col.key}`"
                 :class="[
                   'text-body text-neutral-700',
-                  col.align === 'center' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left',
+                  col.align === 'center'
+                    ? 'text-center'
+                    : col.align === 'right'
+                      ? 'text-right'
+                      : 'text-left',
                   compact ? 'px-3 py-2' : 'px-4 py-3',
                   col.cellClass || '',
                 ]"
               >
-                <slot
-                  :name="`cell-${col.key}`"
-                  :row="row"
-                  :value="row[col.key]"
-                >
+                <slot :name="`cell-${col.key}`" :row="row" :value="row[col.key]">
                   {{ col.render ? col.render(row) : row[col.key] }}
                 </slot>
               </td>
-              <td
-                v-if="$slots.actions"
-                class="px-4 py-3 text-right"
-                @click.stop
-              >
+              <td v-if="$slots.actions" class="px-4 py-3 text-right" @click.stop>
                 <slot name="actions" :row="row" />
               </td>
             </tr>
+            <template v-for="(row, rowIdx) in sortedRows" :key="`exp-${row[rowKey] || rowIdx}`">
             <tr
-              v-for="(row, rowIdx) in sortedRows"
               v-if="expandable"
-              :key="`exp-${row[rowKey] || rowIdx}`"
             >
               <td
                 v-if="expandedRows.has(row[rowKey])"
@@ -263,16 +257,17 @@ function onPageChange(page: number) {
                 <slot name="expanded-row" :row="row" />
               </td>
             </tr>
+            </template>
           </tbody>
         </table>
       </div>
 
-      <div
-        v-if="paginated"
-        class="flex items-center justify-between pt-4"
-      >
+      <div v-if="paginated" class="flex items-center justify-between pt-4">
         <p class="text-caption text-neutral-500">
-          Showing {{ ((internalPage - 1) * pageSize) + 1 }}–{{ Math.min(internalPage * pageSize, totalItems || rows.length) }} of {{ totalItems || rows.length }}
+          Showing {{ (internalPage - 1) * pageSize + 1 }}–{{
+            Math.min(internalPage * pageSize, totalItems || rows.length)
+          }}
+          of {{ totalItems || rows.length }}
         </p>
         <OptPaginator
           :current-page="internalPage"

@@ -41,10 +41,11 @@ const iconComponent = computed(() => {
   if (!props.icon) return null
   // Accept both string names and component references
   if (typeof props.icon === 'string') {
-    const pascal = props.icon
-      .split('-')
-      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-      .join('') + 'Icon'
+    const pascal =
+      props.icon
+        .split('-')
+        .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+        .join('') + 'Icon'
     return (HeroIcons as Record<string, any>)[pascal] || null
   }
   return props.icon
@@ -91,10 +92,7 @@ const colorClasses: Record<string, string> = {
       <OptSpinner />
     </div>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center justify-center py-8 text-center"
-    >
+    <div v-else-if="error" class="flex flex-col items-center justify-center py-8 text-center">
       <p class="text-caption text-danger-600">{{ error }}</p>
     </div>
 
@@ -105,7 +103,10 @@ const colorClasses: Record<string, string> = {
         </p>
         <div
           v-if="iconComponent"
-          :class="['w-9 h-9 rounded-lg flex items-center justify-center shrink-0', colorClasses[color] || colorClasses.brand]"
+          :class="[
+            'w-9 h-9 rounded-lg flex items-center justify-center shrink-0',
+            colorClasses[color] || colorClasses.brand,
+          ]"
         >
           <component :is="iconComponent" class="w-5 h-5" aria-hidden="true" />
         </div>
@@ -119,23 +120,15 @@ const colorClasses: Record<string, string> = {
 
       <div v-if="trend != null" class="flex items-center gap-1.5 mt-2">
         <component :is="trendArrow" :class="['w-4 h-4', trendColor]" aria-hidden="true" />
-        <span :class="['text-caption font-semibold', trendColor]">
-          {{ Math.abs(trend) }}%
-        </span>
+        <span :class="['text-caption font-semibold', trendColor]"> {{ Math.abs(trend) }}% </span>
         <span class="text-caption text-neutral-400">{{ trendLabel }}</span>
       </div>
 
-      <div
-        v-if="comparison"
-        class="text-caption text-neutral-400 mt-1"
-      >
+      <div v-if="comparison" class="text-caption text-neutral-400 mt-1">
         {{ comparison }}
       </div>
 
-      <div
-        v-if="targetPercent != null"
-        class="mt-3"
-      >
+      <div v-if="targetPercent != null" class="mt-3">
         <div class="flex items-center justify-between text-caption text-neutral-500 mb-1">
           <span>{{ targetPercent }}% of target</span>
           <span>{{ value }} / {{ target }} {{ unit }}</span>
@@ -144,24 +137,28 @@ const colorClasses: Record<string, string> = {
           <div
             :class="[
               'h-full rounded-full transition-all duration-500',
-              targetPercent >= 80 ? 'bg-success-500' : targetPercent >= 50 ? 'bg-warning-500' : 'bg-danger-500',
+              targetPercent >= 80
+                ? 'bg-success-500'
+                : targetPercent >= 50
+                  ? 'bg-warning-500'
+                  : 'bg-danger-500',
             ]"
             :style="{ width: `${targetPercent}%` }"
           />
         </div>
       </div>
 
-      <div
-        v-if="sparkline && sparkline.length > 1"
-        class="mt-3 h-8"
-      >
-        <svg
-          class="w-full h-full"
-          viewBox="0 0 100 32"
-          preserveAspectRatio="none"
-        >
+      <div v-if="sparkline && sparkline.length > 1" class="mt-3 h-8">
+        <svg class="w-full h-full" viewBox="0 0 100 32" preserveAspectRatio="none">
           <polyline
-            :points="sparkline.map((v, i) => `${(i / (sparkline.length - 1)) * 100},${32 - (v / Math.max(...sparkline)) * 28}`).join(' ')"
+            :points="
+              (sparkline as number[])
+                .map(
+                  (v, i) =>
+                    `${(i / ((sparkline as number[]).length - 1)) * 100},${32 - (v / Math.max(...(sparkline as number[]))) * 28}`,
+                )
+                .join(' ')
+            "
             fill="none"
             stroke="currentColor"
             stroke-width="2"

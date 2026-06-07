@@ -37,8 +37,13 @@ class LeaveService extends BaseService {
     await this.mutate('post', endpoints.leave.submit, data, ['leave:'])
   }
 
-  async approveLeaveRequestSvc(id: string): Promise<void> {
-    await this.mutate('post', endpoints.leave.approve(id), undefined, ['leave:'])
+  async approveLeaveRequestSvc(id: string, overrideBuddyId?: string): Promise<void> {
+    await this.mutate(
+      'post',
+      endpoints.leave.approve(id),
+      overrideBuddyId ? { override_buddy_id: overrideBuddyId } : undefined,
+      ['leave:'],
+    )
   }
 
   async rejectLeaveRequestSvc(id: string, reason: string): Promise<void> {
@@ -60,7 +65,10 @@ export const getLeaveRequests = () => leaveService.getLeaveRequests()
 export const getBuddyTransfers = () => leaveService.getBuddyTransfers()
 export const submitLeaveRequestSvc = (data: Parameters<LeaveService['submitLeaveRequestSvc']>[0]) =>
   leaveService.submitLeaveRequestSvc(data)
-export const approveLeaveRequestSvc = (id: string) => leaveService.approveLeaveRequestSvc(id)
-export const rejectLeaveRequestSvc = (id: string, reason: string) => leaveService.rejectLeaveRequestSvc(id, reason)
-export const escalateLeaveSvc = (id: string, reason: string) => leaveService.escalateLeaveSvc(id, reason)
+export const approveLeaveRequestSvc = (id: string, overrideBuddyId?: string) =>
+  leaveService.approveLeaveRequestSvc(id, overrideBuddyId)
+export const rejectLeaveRequestSvc = (id: string, reason: string) =>
+  leaveService.rejectLeaveRequestSvc(id, reason)
+export const escalateLeaveSvc = (id: string, reason: string) =>
+  leaveService.escalateLeaveSvc(id, reason)
 export const archiveLeaveSvc = (id: string) => leaveService.archiveLeaveSvc(id)

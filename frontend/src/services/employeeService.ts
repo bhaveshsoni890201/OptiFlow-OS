@@ -37,7 +37,10 @@ class EmployeeService extends BaseService {
   }
 
   async deleteEmployee(id: string): Promise<void> {
-    await this.mutate('delete', endpoints.employees.delete(id), undefined, ['employee:', `employee:${id}`])
+    await this.mutate('delete', endpoints.employees.delete(id), undefined, [
+      'employee:',
+      `employee:${id}`,
+    ])
   }
 }
 
@@ -46,5 +49,6 @@ const employeeService = new EmployeeService()
 export const getEmployees = () => employeeService.getEmployees()
 export const getEmployee = (id: string) => employeeService.getEmployee(id)
 export const createEmployee = (employee: Employee) => employeeService.createEmployee(employee)
-export const updateEmployee = (id: string, data: Partial<Employee>) => employeeService.updateEmployee(id, data)
+export const updateEmployee = (id: string, data: Partial<Employee>) =>
+  employeeService.updateEmployee(id, data)
 export const deleteEmployee = (id: string) => employeeService.deleteEmployee(id)

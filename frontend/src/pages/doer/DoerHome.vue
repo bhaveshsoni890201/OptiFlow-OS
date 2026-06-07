@@ -24,14 +24,26 @@ import {
   SparklesIcon,
 } from '@heroicons/vue/24/outline'
 import { CheckCircleIcon as CheckCircleSolidIcon } from '@heroicons/vue/24/solid'
-import type { ChecklistItem, DelegationTask, Worklist, AttendanceLog, BuddyTransfer, LeaveRequest } from '../../types'
+import type {
+  ChecklistItem,
+  DelegationTask,
+  Worklist,
+  AttendanceLog,
+  BuddyTransfer,
+  LeaveRequest,
+} from '../../types'
 import { formatDateWithWeekday, formatTime, formatDateTime } from '../../utils/formatters'
 import OptSkeleton from '../../components/common/OptSkeleton.vue'
 import OptKpiCard from '../../components/common/OptKpiCard.vue'
 import OptEmptyState from '../../components/common/OptEmptyState.vue'
 import { useTaskStore } from '../../stores/taskStore'
 import { useNotificationStore } from '../../stores/notificationStore'
-import { getAttendanceLogs, getBuddyTransfers, getLeaveRequests, getWorklists } from '../../services'
+import {
+  getAttendanceLogs,
+  getBuddyTransfers,
+  getLeaveRequests,
+  getWorklists,
+} from '../../services'
 import { useLoadingTimeout } from '../../composables/useLoadingTimeout'
 
 const { timedOut, startTimeout, clearTimeout: clearLoadTimeout } = useLoadingTimeout(8000)
@@ -88,25 +100,21 @@ const myChecklist = computed(() =>
   taskStore.checklistTasks.filter((c) => c.assigned_to === empId.value),
 )
 const myFMS = computed(() => taskStore.fmsTasks.filter((f) => f.assigned_to === empId.value))
-const myWorklists = computed(() =>
-  worklistData.value.filter((w) => w.assigned_to === empId.value),
-)
+const myWorklists = computed(() => worklistData.value.filter((w) => w.assigned_to === empId.value))
 
 const dueTasksCount = computed(() => {
   const due = [...myDelegations.value, ...myChecklist.value, ...myFMS.value].filter((t) => {
     if ('due_date' in t && t.due_date) {
-      return new Date(t.due_date) <= today.value && t.status !== 'completed' && t.status !== 'reviewed'
+      return (
+        new Date(t.due_date) <= today.value && t.status !== 'completed' && t.status !== 'reviewed'
+      )
     }
     return false
   })
   return due.length
 })
 
-const allMyTasks = computed(() => [
-  ...myDelegations.value,
-  ...myChecklist.value,
-  ...myFMS.value,
-])
+const allMyTasks = computed(() => [...myDelegations.value, ...myChecklist.value, ...myFMS.value])
 
 const kpis = computed(() => ({
   dueToday:
@@ -125,12 +133,10 @@ const kpis = computed(() => ({
   overdue: myDelegations.value.filter(
     (d) => new Date(d.due_date) < today.value && d.status !== 'completed',
   ).length,
-  inProgress: allMyTasks.value.filter(
-    (t) => t.status === 'in_progress',
-  ).length,
+  inProgress: allMyTasks.value.filter((t) => t.status === 'in_progress').length,
   completed: allMyTasks.value.filter((t) => t.status === 'completed').length,
-  completedToday: allMyTasks.value.filter(
-    (t) => t.status === 'completed' && 'completed_on' in t && t.completed_on
+  completedToday: allMyTasks.value.filter((t) =>
+    t.status === 'completed' && 'completed_on' in t && t.completed_on
       ? new Date(t.completed_on).toDateString() === today.value.toDateString()
       : false,
   ).length,
@@ -159,18 +165,22 @@ const pendingDelegations = computed(() =>
 const myLeaveRequests = computed(() =>
   leaveRequests.value.filter((l) => l.employee_id === empId.value),
 )
-const pendingLeaveCount = computed(() =>
-  myLeaveRequests.value.filter((l) => l.status === 'pending').length,
+const pendingLeaveCount = computed(
+  () => myLeaveRequests.value.filter((l) => l.status === 'pending').length,
 )
-const approvedLeaveToday = computed(() =>
-  myLeaveRequests.value.filter(
-    (l) => l.status === 'approved' && todayStr.value >= l.start_date && todayStr.value <= l.end_date,
-  ).length,
+const approvedLeaveToday = computed(
+  () =>
+    myLeaveRequests.value.filter(
+      (l) =>
+        l.status === 'approved' && todayStr.value >= l.start_date && todayStr.value <= l.end_date,
+    ).length,
 )
 
 // Training progress widget
 const trainingProgress = computed(() => {
-  const total = taskStore.delegationTasks.filter((d) => d.assigned_to === empId.value && d.category === 'training').length
+  const total = taskStore.delegationTasks.filter(
+    (d) => d.assigned_to === empId.value && d.category === 'training',
+  ).length
   const completed = taskStore.delegationTasks.filter(
     (d) => d.assigned_to === empId.value && d.category === 'training' && d.status === 'completed',
   ).length
@@ -201,15 +211,15 @@ const productivity = computed(() => {
 })
 
 const activeBuddyTransfer = computed(() => {
-  const bt = buddyTransfers.value.find(
-    (t) => t.buddy_owner === empId.value && !t.reverted,
-  )
+  const bt = buddyTransfers.value.find((t) => t.buddy_owner === empId.value && !t.reverted)
   if (!bt) return null
   const leave = leaveRequests.value.find((l) => l.id === bt.leave_request_id)
   return { transfer: bt, leave }
 })
 
-const captainAlerts = computed(() => notificationStore.notifications.filter((n) => !n.read).slice(0, 3))
+const captainAlerts = computed(() =>
+  notificationStore.notifications.filter((n) => !n.read).slice(0, 3),
+)
 
 async function handleCheckIn() {
   checkingIn.value = true
@@ -228,7 +238,11 @@ async function handleMarkDone(item: ChecklistItem) {
   await new Promise((r) => setTimeout(r, 400))
   item.status = 'completed'
   item.completed_on = new Date().toISOString()
-  store.addToast({ type: 'success', message: `${item.title} ${t('home.markedDone')}`, duration: 3000 })
+  store.addToast({
+    type: 'success',
+    message: `${item.title} ${t('home.markedDone')}`,
+    duration: 3000,
+  })
   await new Promise((r) => setTimeout(r, 1100))
   completing.value.delete(item.id)
 }
@@ -250,26 +264,23 @@ function getPriorityColor(p: string) {
 }
 
 async function fetchDashboard() {
-   error.value = ''
-   loading.value = true
-   startTimeout()
-   try {
-     const [attendanceData, btData, lvData, wlData] = await Promise.all([
-       getAttendanceLogs(),
-       getBuddyTransfers(),
-       getLeaveRequests(),
-       getWorklists(),
-     ])
-     attendanceLogs.value = attendanceData
-     buddyTransfers.value = btData
-     leaveRequests.value = lvData
-     worklistData.value = wlData
-     await Promise.all([
-       taskStore.fetchTasks(),
-       notificationStore.fetch(),
-     ])
-     if (timedOut.value) throw new Error('Request timed out')
-   } catch {
+  error.value = ''
+  loading.value = true
+  startTimeout()
+  try {
+    const [attendanceData, btData, lvData, wlData] = await Promise.all([
+      getAttendanceLogs(),
+      getBuddyTransfers(),
+      getLeaveRequests(),
+      getWorklists(),
+    ])
+    attendanceLogs.value = attendanceData
+    buddyTransfers.value = btData
+    leaveRequests.value = lvData
+    worklistData.value = wlData
+    await Promise.all([taskStore.fetchTasks(), notificationStore.fetch()])
+    if (timedOut.value) throw new Error('Request timed out')
+  } catch {
     error.value = t('home.loadError')
     if (timedOut.value) error.value = t('home.timedOut')
   }
@@ -283,7 +294,10 @@ const allDone = computed(
   () => pendingChecklist.value.length === 0 && pendingDelegations.value.length === 0,
 )
 const noWorklist = computed(
-  () => myChecklist.value.filter((c) => c.status !== 'completed').length === 0 && myDelegations.value.length === 0 && myFMS.value.length === 0,
+  () =>
+    myChecklist.value.filter((c) => c.status !== 'completed').length === 0 &&
+    myDelegations.value.length === 0 &&
+    myFMS.value.length === 0,
 )
 </script>
 
@@ -298,7 +312,8 @@ const noWorklist = computed(
   <div
     v-if="error"
     class="mb-4 px-4 py-3 bg-danger-50 border border-danger-200 rounded-lg flex items-start gap-3"
-    role="alert" aria-live="polite"
+    role="alert"
+    aria-live="polite"
   >
     <ExclamationTriangleIcon class="w-5 h-5 text-danger-600 shrink-0 mt-0.5" />
     <p class="text-body text-danger-700 flex-1">{{ error }}</p>
@@ -311,8 +326,8 @@ const noWorklist = computed(
       </button>
       <button
         class="text-danger-500 hover:text-danger-700 min-h-touch min-w-touch"
-        @click="error = ''"
         aria-label="Dismiss error"
+        @click="error = ''"
       >
         <XMarkIcon class="w-4 h-4" />
       </button>
@@ -354,7 +369,9 @@ const noWorklist = computed(
         <CalendarDaysIcon class="w-4 h-4" />
         {{ dateStr }}
       </p>
-      <p class="text-body-strong text-brand-600 mt-1">{{ $t('home.tasksDueToday', { count: dueTasksCount }) }}</p>
+      <p class="text-body-strong text-brand-600 mt-1">
+        {{ $t('home.tasksDueToday', { count: dueTasksCount }) }}
+      </p>
     </div>
 
     <!-- Row 1: Attendance + Leave status (side by side on sm+) -->
@@ -362,7 +379,9 @@ const noWorklist = computed(
       <!-- Attendance strip -->
       <div class="card p-4 flex items-center justify-between">
         <div v-if="!checkedIn" class="flex items-center gap-3 flex-1">
-          <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center"
+          >
             <ArrowRightOnRectangleIcon class="w-5 h-5" />
           </div>
           <div>
@@ -371,12 +390,19 @@ const noWorklist = computed(
           </div>
         </div>
         <div v-else class="flex items-center gap-3 flex-1">
-          <div class="w-10 h-10 rounded-full bg-success-50 text-success-600 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-full bg-success-50 text-success-600 flex items-center justify-center"
+          >
             <CheckCircleIcon class="w-5 h-5" />
           </div>
           <div>
-            <p class="text-body-strong text-neutral-900">{{ $t('home.checkIn.checkedInAt') }} {{ attendance?.check_in }}</p>
-            <p v-if="attendance?.late_minutes && attendance.late_minutes > 0" class="text-caption text-danger-600">
+            <p class="text-body-strong text-neutral-900">
+              {{ $t('home.checkIn.checkedInAt') }} {{ attendance?.check_in }}
+            </p>
+            <p
+              v-if="attendance?.late_minutes && attendance.late_minutes > 0"
+              class="text-caption text-danger-600"
+            >
               {{ $t('home.checkIn.lateBy', { minutes: attendance.late_minutes }) }}
             </p>
             <p v-else class="text-caption text-success-600">{{ $t('home.checkIn.onTime') }}</p>
@@ -384,50 +410,116 @@ const noWorklist = computed(
         </div>
         <div class="flex items-center gap-2">
           <div v-if="!checkedIn" class="flex items-center bg-neutral-100 rounded-lg p-0.5">
-            <button class="px-3 py-1.5 text-caption rounded-md transition-colors min-h-touch" :class="workMode === 'wfo' ? 'bg-white shadow-sm text-neutral-900 font-semibold' : 'text-neutral-500'" @click="workMode = 'wfo'">{{ $t('home.wfo') }}</button>
-            <button class="px-3 py-1.5 text-caption rounded-md transition-colors min-h-touch" :class="workMode === 'wfh' ? 'bg-white shadow-sm text-neutral-900 font-semibold' : 'text-neutral-500'" @click="workMode = 'wfh'">{{ $t('home.wfh') }}</button>
+            <button
+              class="px-3 py-1.5 text-caption rounded-md transition-colors min-h-touch"
+              :class="
+                workMode === 'wfo'
+                  ? 'bg-white shadow-sm text-neutral-900 font-semibold'
+                  : 'text-neutral-500'
+              "
+              @click="workMode = 'wfo'"
+            >
+              {{ $t('home.wfo') }}
+            </button>
+            <button
+              class="px-3 py-1.5 text-caption rounded-md transition-colors min-h-touch"
+              :class="
+                workMode === 'wfh'
+                  ? 'bg-white shadow-sm text-neutral-900 font-semibold'
+                  : 'text-neutral-500'
+              "
+              @click="workMode = 'wfh'"
+            >
+              {{ $t('home.wfh') }}
+            </button>
           </div>
-          <button class="h-9 px-4 rounded-lg text-button transition-colors min-h-touch" :class="checkedIn ? 'bg-danger-50 text-danger-600 hover:bg-danger-100' : 'bg-brand-600 text-white hover:bg-brand-700'" :disabled="checkingIn" @click="checkedIn ? handleCheckOut() : handleCheckIn()">
-            {{ checkingIn ? $t('common.pleaseWait') : checkedIn ? $t('home.checkOutBtn') : $t('home.checkInBtn') }}
+          <button
+            class="h-9 px-4 rounded-lg text-button transition-colors min-h-touch"
+            :class="
+              checkedIn
+                ? 'bg-danger-50 text-danger-600 hover:bg-danger-100'
+                : 'bg-brand-600 text-white hover:bg-brand-700'
+            "
+            :disabled="checkingIn"
+            @click="checkedIn ? handleCheckOut() : handleCheckIn()"
+          >
+            {{
+              checkingIn
+                ? $t('common.pleaseWait')
+                : checkedIn
+                  ? $t('home.checkOutBtn')
+                  : $t('home.checkInBtn')
+            }}
           </button>
         </div>
       </div>
 
       <!-- Leave status mini-widget -->
       <div class="card p-4 flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center">
+        <div
+          class="w-10 h-10 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center"
+        >
           <BriefcaseIcon class="w-5 h-5" />
         </div>
         <div class="flex-1">
           <p class="text-body-strong text-neutral-900">{{ $t('home.leaveStatus.title') }}</p>
           <p class="text-caption text-neutral-500">
-            <template v-if="pendingLeaveCount > 0">{{ $t('home.leaveStatus.pending', { count: pendingLeaveCount }) }}</template>
-            <template v-else-if="approvedLeaveToday > 0">{{ $t('home.leaveStatus.onLeaveToday') }}</template>
+            <template v-if="pendingLeaveCount > 0">{{
+              $t('home.leaveStatus.pending', { count: pendingLeaveCount })
+            }}</template>
+            <template v-else-if="approvedLeaveToday > 0">{{
+              $t('home.leaveStatus.onLeaveToday')
+            }}</template>
             <template v-else>{{ $t('home.leaveStatus.noLeave') }}</template>
           </p>
         </div>
-        <button class="text-caption text-brand-600 font-semibold whitespace-nowrap min-h-touch" @click="router.push('/doer/leave')">{{ $t('common.seeAll') }}</button>
+        <button
+          class="text-caption text-brand-600 font-semibold whitespace-nowrap min-h-touch"
+          @click="router.push('/doer/leave')"
+        >
+          {{ $t('common.seeAll') }}
+        </button>
       </div>
     </div>
 
     <!-- Row 2: Quick Actions bar -->
     <div class="card p-3 mb-4">
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        <button class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch" @click="router.push('/doer/tasks/create')">
+        <button
+          class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch"
+          @click="router.push('/doer/tasks/create')"
+        >
           <PlusIcon class="w-5 h-5 text-brand-600" />
-          <span class="text-caption font-medium text-neutral-700">{{ $t('home.quickActions.createTask') }}</span>
+          <span class="text-caption font-medium text-neutral-700">{{
+            $t('home.quickActions.createTask')
+          }}</span>
         </button>
-        <button class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch" @click="router.push('/doer/leave')">
+        <button
+          class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch"
+          @click="router.push('/doer/leave')"
+        >
           <CalendarDaysIcon class="w-5 h-5 text-brand-600" />
-          <span class="text-caption font-medium text-neutral-700">{{ $t('home.quickActions.applyLeave') }}</span>
+          <span class="text-caption font-medium text-neutral-700">{{
+            $t('home.quickActions.applyLeave')
+          }}</span>
         </button>
-        <button class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch" @click="router.push('/doer/tickets')">
+        <button
+          class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch"
+          @click="router.push('/doer/tickets')"
+        >
           <TicketIcon class="w-5 h-5 text-brand-600" />
-          <span class="text-caption font-medium text-neutral-700">{{ $t('home.quickActions.raiseTicket') }}</span>
+          <span class="text-caption font-medium text-neutral-700">{{
+            $t('home.quickActions.raiseTicket')
+          }}</span>
         </button>
-        <button class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch" @click="router.push('/doer/training')">
+        <button
+          class="flex flex-col items-center gap-1 py-3 px-2 rounded-lg hover:bg-brand-50 transition-colors min-h-touch"
+          @click="router.push('/doer/training')"
+        >
           <AcademicCapIcon class="w-5 h-5 text-brand-600" />
-          <span class="text-caption font-medium text-neutral-700">{{ $t('home.quickActions.startTraining') }}</span>
+          <span class="text-caption font-medium text-neutral-700">{{
+            $t('home.quickActions.startTraining')
+          }}</span>
         </button>
       </div>
     </div>
@@ -436,12 +528,42 @@ const noWorklist = computed(
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
       <!-- Extended KPI tiles (2 cols, spans full on mobile) -->
       <div class="grid grid-cols-2 gap-3">
-        <OptKpiCard :title="$t('home.taskStatus.dueToday')" :value="kpis.dueToday" color="brand" @click="router.push('/doer/tasks')" />
-        <OptKpiCard :title="$t('home.taskStatus.overdue')" :value="kpis.overdue" color="danger" @click="router.push('/doer/tasks')" />
-        <OptKpiCard :title="$t('home.taskStatus.inProgress')" :value="kpis.inProgress" color="info" @click="router.push('/doer/tasks')" />
-        <OptKpiCard :title="$t('home.taskStatus.completed')" :value="kpis.completed" color="success" @click="router.push('/doer/tasks')" />
-        <OptKpiCard title="Completed Today" :value="kpis.completedToday" color="success" @click="router.push('/doer/tasks')" />
-        <OptKpiCard title="Pending Approvals" :value="kpis.pendingApprovals" color="warning" @click="router.push('/doer/approvals')" />
+        <OptKpiCard
+          :title="$t('home.taskStatus.dueToday')"
+          :value="kpis.dueToday"
+          color="brand"
+          @click="router.push('/doer/tasks')"
+        />
+        <OptKpiCard
+          :title="$t('home.taskStatus.overdue')"
+          :value="kpis.overdue"
+          color="danger"
+          @click="router.push('/doer/tasks')"
+        />
+        <OptKpiCard
+          :title="$t('home.taskStatus.inProgress')"
+          :value="kpis.inProgress"
+          color="info"
+          @click="router.push('/doer/tasks')"
+        />
+        <OptKpiCard
+          :title="$t('home.taskStatus.completed')"
+          :value="kpis.completed"
+          color="success"
+          @click="router.push('/doer/tasks')"
+        />
+        <OptKpiCard
+          title="Completed Today"
+          :value="kpis.completedToday"
+          color="success"
+          @click="router.push('/doer/tasks')"
+        />
+        <OptKpiCard
+          title="Pending Approvals"
+          :value="kpis.pendingApprovals"
+          color="warning"
+          @click="router.push('/doer/approvals')"
+        />
       </div>
 
       <!-- Productivity snapshot + Training progress -->
@@ -457,10 +579,15 @@ const noWorklist = computed(
           <div class="flex items-center gap-3">
             <div class="flex-1">
               <div class="w-full bg-neutral-100 rounded-full h-2">
-                <div class="bg-brand-600 h-2 rounded-full transition-all" :style="{ width: trainingProgress.percent + '%' }" />
+                <div
+                  class="bg-brand-600 h-2 rounded-full transition-all"
+                  :style="{ width: trainingProgress.percent + '%' }"
+                />
               </div>
             </div>
-            <span class="text-caption font-semibold text-neutral-700 whitespace-nowrap">{{ trainingProgress.completed }}/{{ trainingProgress.total }}</span>
+            <span class="text-caption font-semibold text-neutral-700 whitespace-nowrap"
+              >{{ trainingProgress.completed }}/{{ trainingProgress.total }}</span
+            >
           </div>
         </div>
 
@@ -475,7 +602,9 @@ const noWorklist = computed(
           <div class="flex items-center gap-4">
             <div class="flex-1 text-center">
               <p class="text-h2 text-brand-600">{{ productivity.completionRate }}%</p>
-              <p class="text-caption text-neutral-500">{{ $t('home.productivity.completionRate') }}</p>
+              <p class="text-caption text-neutral-500">
+                {{ $t('home.productivity.completionRate') }}
+              </p>
             </div>
             <div class="w-px h-10 bg-neutral-200" />
             <div class="flex-1 text-center">
@@ -495,7 +624,10 @@ const noWorklist = computed(
       <CheckCircleSolidIcon class="w-12 h-12 text-success-600 mx-auto mb-2" />
       <h3 class="text-h3 text-neutral-900">{{ $t('home.allCaughtUp.heading') }}</h3>
       <p class="text-body text-neutral-500 mt-1">{{ $t('home.allCaughtUp.message') }}</p>
-      <button class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors" @click="router.push('/doer/tasks')">
+      <button
+        class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
+        @click="router.push('/doer/tasks')"
+      >
         {{ $t('home.allCaughtUp.viewTasks') }}
       </button>
     </div>
@@ -517,19 +649,55 @@ const noWorklist = computed(
           <ClipboardDocumentCheckIcon class="w-5 h-5 text-brand-600" />
           {{ $t('home.dueChecklist.title') }}
         </h2>
-        <button class="text-caption text-brand-600 font-semibold min-h-touch" @click="router.push('/doer/tasks')">{{ $t('common.seeAll') }}</button>
+        <button
+          class="text-caption text-brand-600 font-semibold min-h-touch"
+          @click="router.push('/doer/tasks')"
+        >
+          {{ $t('common.seeAll') }}
+        </button>
       </div>
-      <OptEmptyState v-if="pendingChecklist.length === 0" type="tasks" :title="$t('home.dueChecklist.allDone')" :description="$t('home.dueChecklist.allDoneMessage')" />
+      <OptEmptyState
+        v-if="pendingChecklist.length === 0"
+        type="tasks"
+        :title="$t('home.dueChecklist.allDone')"
+        :description="$t('home.dueChecklist.allDoneMessage')"
+      />
       <div v-else class="space-y-2">
-        <div v-for="item in pendingChecklist" :key="item.id" :class="['card p-3 flex items-center gap-3', completing.has(item.id) ? 'animate-fade-out-down' : '']">
-          <button class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors min-h-touch min-w-touch" :class="completing.has(item.id) ? 'animate-check-pop bg-success-600 border-success-600 text-white' : item.status === 'completed' ? 'bg-success-600 border-success-600 text-white' : 'border-neutral-300 hover:border-brand-600'" @click="handleMarkDone(item)">
-            <CheckCircleSolidIcon v-if="item.status === 'completed' || completing.has(item.id)" class="w-4 h-4" />
+        <div
+          v-for="item in pendingChecklist"
+          :key="item.id"
+          :class="[
+            'card p-3 flex items-center gap-3',
+            completing.has(item.id) ? 'animate-fade-out-down' : '',
+          ]"
+        >
+          <button
+            class="w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors min-h-touch min-w-touch"
+            :class="
+              completing.has(item.id)
+                ? 'animate-check-pop bg-success-600 border-success-600 text-white'
+                : item.status === 'completed'
+                  ? 'bg-success-600 border-success-600 text-white'
+                  : 'border-neutral-300 hover:border-brand-600'
+            "
+            @click="handleMarkDone(item)"
+          >
+            <CheckCircleSolidIcon
+              v-if="item.status === 'completed' || completing.has(item.id)"
+              class="w-4 h-4"
+            />
           </button>
           <div class="flex-1 min-w-0">
             <p class="text-body-strong text-neutral-900 truncate">{{ item.title }}</p>
-            <p class="text-caption text-neutral-500 flex items-center gap-1"><ClockIcon class="w-3 h-3" /> {{ $t('home.dueTime', { time: formatTime(item.due_date) }) }}</p>
+            <p class="text-caption text-neutral-500 flex items-center gap-1">
+              <ClockIcon class="w-3 h-3" />
+              {{ $t('home.dueTime', { time: formatTime(item.due_date) }) }}
+            </p>
           </div>
-          <span class="chip text-caption font-medium px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 shrink-0">{{ item.frequency }}</span>
+          <span
+            class="chip text-caption font-medium px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-600 shrink-0"
+            >{{ item.frequency }}</span
+          >
         </div>
       </div>
     </section>
@@ -541,21 +709,50 @@ const noWorklist = computed(
           <DocumentTextIcon class="w-5 h-5 text-brand-600" />
           {{ $t('home.pendingDelegations.title') }}
         </h2>
-        <button class="text-caption text-brand-600 font-semibold min-h-touch" @click="router.push('/doer/tasks')">{{ $t('common.seeAll') }}</button>
+        <button
+          class="text-caption text-brand-600 font-semibold min-h-touch"
+          @click="router.push('/doer/tasks')"
+        >
+          {{ $t('common.seeAll') }}
+        </button>
       </div>
-      <OptEmptyState v-if="pendingDelegations.length === 0" type="tasks" :title="$t('home.pendingDelegations.allDelegated')" :description="$t('home.pendingDelegations.nonePending')" />
+      <OptEmptyState
+        v-if="pendingDelegations.length === 0"
+        type="tasks"
+        :title="$t('home.pendingDelegations.allDelegated')"
+        :description="$t('home.pendingDelegations.nonePending')"
+      />
       <div v-else class="space-y-2">
-        <div v-for="task in pendingDelegations" :key="task.id" class="card p-4 hover:shadow-card-hover transition-shadow cursor-pointer" @click="router.push(`/doer/tasks/${task.id}`)">
+        <div
+          v-for="task in pendingDelegations"
+          :key="task.id"
+          class="card p-4 hover:shadow-card-hover transition-shadow cursor-pointer"
+          @click="router.push(`/doer/tasks/${task.id}`)"
+        >
           <div class="flex items-start justify-between gap-3">
             <div class="flex-1 min-w-0">
               <p class="text-body-strong text-neutral-900 truncate">{{ task.title }}</p>
-              <p class="text-caption text-neutral-500 mt-1">{{ $t('home.dueTime', { time: formatDateTime(task.due_date) }) }}</p>
+              <p class="text-caption text-neutral-500 mt-1">
+                {{ $t('home.dueTime', { time: formatDateTime(task.due_date) }) }}
+              </p>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-caption font-medium shrink-0" :class="getPriorityColor(task.priority)">{{ task.priority }}</span>
+            <span
+              class="px-2 py-0.5 rounded-full text-caption font-medium shrink-0"
+              :class="getPriorityColor(task.priority)"
+              >{{ task.priority }}</span
+            >
           </div>
           <div class="flex items-center gap-2 mt-2">
-            <span class="px-2 py-0.5 rounded-full text-caption font-medium bg-brand-50 text-brand-600">{{ task.status.replace('_', ' ') }}</span>
-            <span v-if="task.reminder_count > 0" class="text-caption text-warning-500 flex items-center gap-1"><BellAlertIcon class="w-3 h-3" /> {{ $t('home.reminderCount', { count: task.reminder_count }) }}</span>
+            <span
+              class="px-2 py-0.5 rounded-full text-caption font-medium bg-brand-50 text-brand-600"
+              >{{ task.status.replace('_', ' ') }}</span
+            >
+            <span
+              v-if="task.reminder_count > 0"
+              class="text-caption text-warning-500 flex items-center gap-1"
+              ><BellAlertIcon class="w-3 h-3" />
+              {{ $t('home.reminderCount', { count: task.reminder_count }) }}</span
+            >
           </div>
         </div>
       </div>
@@ -564,7 +761,12 @@ const noWorklist = computed(
     <!-- FMS Workflow items -->
     <section class="mb-5">
       <h2 class="text-h2 text-neutral-900 mb-3">{{ $t('home.fmsWorkflow.title') }}</h2>
-      <OptEmptyState v-if="myFMS.length === 0" type="tasks" :title="$t('home.fmsWorkflow.noItems')" :description="$t('home.fmsWorkflow.allUpToDate')" />
+      <OptEmptyState
+        v-if="myFMS.length === 0"
+        type="tasks"
+        :title="$t('home.fmsWorkflow.noItems')"
+        :description="$t('home.fmsWorkflow.allUpToDate')"
+      />
       <div v-else class="space-y-2">
         <div v-for="task in myFMS" :key="task.id" class="card p-4 border-l-4 border-l-brand-500">
           <p class="text-body-strong text-neutral-900">{{ task.title }}</p>
@@ -579,7 +781,12 @@ const noWorklist = computed(
         <BellAlertIcon class="w-5 h-5 text-warning-500" />
         {{ $t('home.alertsReminders.title') }}
       </h2>
-      <OptEmptyState v-if="captainAlerts.length === 0" type="data" :title="$t('home.alertsReminders.allClear')" :description="$t('home.alertsReminders.noAlerts')" />
+      <OptEmptyState
+        v-if="captainAlerts.length === 0"
+        type="data"
+        :title="$t('home.alertsReminders.allClear')"
+        :description="$t('home.alertsReminders.noAlerts')"
+      />
       <div v-else class="space-y-2">
         <div v-for="n in captainAlerts" :key="n.id" class="card p-3 flex items-start gap-3">
           <ExclamationTriangleIcon class="w-5 h-5 text-warning-500 shrink-0 mt-0.5" />
@@ -596,10 +803,18 @@ const noWorklist = computed(
       <div class="card p-4 border-l-4 border-l-info-600 bg-gradient-to-r from-info-50/50 to-white">
         <div class="flex items-center gap-2 mb-2">
           <UserGroupIcon class="w-5 h-5 text-info-600" />
-          <h3 class="text-h3 text-neutral-900">{{ $t('home.coveringFor', { name: activeBuddyTransfer.leave?.employee_name || 'a teammate' }) }}</h3>
+          <h3 class="text-h3 text-neutral-900">
+            {{
+              $t('home.coveringFor', {
+                name: activeBuddyTransfer.leave?.employee_name || 'a teammate',
+              })
+            }}
+          </h3>
         </div>
         <p class="text-body text-neutral-600">{{ activeBuddyTransfer.transfer.task_reference }}</p>
-        <p class="text-caption text-neutral-500 mt-1">{{ activeBuddyTransfer.leave?.start_date }} – {{ activeBuddyTransfer.leave?.end_date }}</p>
+        <p class="text-caption text-neutral-500 mt-1">
+          {{ activeBuddyTransfer.leave?.start_date }} – {{ activeBuddyTransfer.leave?.end_date }}
+        </p>
       </div>
     </section>
   </template>

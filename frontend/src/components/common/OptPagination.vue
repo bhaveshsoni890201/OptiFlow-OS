@@ -19,7 +19,10 @@ const emit = defineEmits<{
     class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-slate-100 mt-4"
   >
     <p class="text-xs text-slate-400">
-      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{ Math.min(currentPage * pageSize, totalItems) }} of {{ totalItems }}
+      Showing {{ (currentPage - 1) * pageSize + 1 }}–{{
+        Math.min(currentPage * pageSize, totalItems)
+      }}
+      of {{ totalItems }}
     </p>
     <div class="flex items-center gap-1">
       <button

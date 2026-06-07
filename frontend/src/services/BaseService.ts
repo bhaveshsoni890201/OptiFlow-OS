@@ -4,14 +4,21 @@ import { logger } from '../utils/logger'
 
 // ─── ServiceError ────────────────────────────────────────────────
 export class ServiceError extends Error {
+  code: string = 'UNKNOWN'
+  retryable: boolean = false
+  status?: number
+
   constructor(
     message: string,
-    public code: string = 'UNKNOWN',
-    public retryable: boolean = false,
-    public status?: number,
+    code: string = 'UNKNOWN',
+    retryable: boolean = false,
+    status?: number,
   ) {
     super(message)
     this.name = 'ServiceError'
+    this.code = code
+    this.retryable = retryable
+    this.status = status
   }
 }
 
@@ -78,10 +85,7 @@ interface RetryOptions {
   shouldRetry?: (error: unknown) => boolean
 }
 
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  options: RetryOptions = {},
-): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, options: RetryOptions = {}): Promise<T> {
   const { maxRetries = 3, baseDelayMs = 1000 } = options
   const shouldRetry = options.shouldRetry ?? isTransientError
 
@@ -104,17 +108,25 @@ function isTransientError(error: unknown): boolean {
   if (error instanceof ServiceError) return error.retryable
   if (error instanceof Error) {
     const msg = error.message.toLowerCase()
-    if (msg.includes('timeout') || msg.includes('network error') || msg.includes('econnrefused')) return true
-    if (msg.includes('429') || msg.includes('503') || msg.includes('502') || msg.includes('504')) return true
+    if (msg.includes('timeout') || msg.includes('network error') || msg.includes('econnrefused'))
+      return true
+    if (msg.includes('429') || msg.includes('503') || msg.includes('502') || msg.includes('504'))
+      return true
   }
   return false
 }
 
 function isNetworkError(error: unknown): boolean {
-  if (error instanceof ServiceError) return error.retryable || !!(error.status && error.status >= 500)
+  if (error instanceof ServiceError)
+    return error.retryable || !!(error.status && error.status >= 500)
   if (error instanceof Error) {
     const msg = error.message.toLowerCase()
-    return msg.includes('network error') || msg.includes('econnrefused') || msg.includes('timeout') || msg.includes('failed to fetch')
+    return (
+      msg.includes('network error') ||
+      msg.includes('econnrefused') ||
+      msg.includes('timeout') ||
+      msg.includes('failed to fetch')
+    )
   }
   return false
 }
@@ -205,7 +217,11 @@ export abstract class BaseService {
       const svcErr = normalizeError(err)
       if (isNetworkError(err)) {
         logger.warn('BaseService', 'Network error, falling back to mock')
-        try { return await mockLoader() } catch { /* ignore */ }
+        try {
+          return await mockLoader()
+        } catch {
+          /* ignore */
+        }
       }
       throw svcErr
     }
@@ -219,13 +235,15 @@ export abstract class BaseService {
   ): Promise<T> {
     if (isMockMode()) return undefined as T
 
-    const apiFn = method === 'post' ? apiPost
-      : method === 'put' ? apiPut
-      : method === 'patch' ? apiPatch
-      : apiDelete
-
     try {
-      const result = await apiFn<T>(endpoint, data)
+      const result =
+        method === 'delete'
+          ? await apiDelete<T>(endpoint)
+          : method === 'post'
+            ? await apiPost<T>(endpoint, data)
+            : method === 'put'
+              ? await apiPut<T>(endpoint, data)
+              : await apiPatch<T>(endpoint, data)
       if (invalidatePatterns) {
         for (const p of invalidatePatterns) cache.invalidate(p)
       }

@@ -35,7 +35,10 @@ test.describe('Critical Paths — Doer Panel', () => {
   test('doer can apply for leave', async ({ page }) => {
     await page.goto('/doer/leave')
     await expect(page.locator('h1').first()).toBeVisible()
-    const applyBtn = page.locator('button').filter({ hasText: /apply|new|request/i }).first()
+    const applyBtn = page
+      .locator('button')
+      .filter({ hasText: /apply|new|request/i })
+      .first()
     if (await applyBtn.isVisible()) {
       await applyBtn.click()
     }

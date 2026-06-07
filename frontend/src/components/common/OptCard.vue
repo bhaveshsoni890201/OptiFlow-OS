@@ -44,18 +44,13 @@ const paddingClasses: Record<string, string> = {
       <OptSpinner size="lg" />
     </div>
 
-    <div
-      v-else-if="error"
-      class="flex flex-col items-center justify-center py-12 text-center"
-    >
+    <div v-else-if="error" class="flex flex-col items-center justify-center py-12 text-center">
       <div class="w-12 h-12 rounded-full bg-danger-50 flex items-center justify-center mb-3">
         <ExclamationTriangleIcon class="w-6 h-6 text-danger-600" />
       </div>
       <p class="text-body-strong text-neutral-700 mb-1">Something went wrong</p>
       <p class="text-caption text-neutral-500 mb-3">{{ error }}</p>
-      <OptButton variant="secondary" size="sm" @click="emit('retry')">
-        Retry
-      </OptButton>
+      <OptButton variant="secondary" size="sm" @click="emit('retry')"> Retry </OptButton>
     </div>
 
     <template v-else>

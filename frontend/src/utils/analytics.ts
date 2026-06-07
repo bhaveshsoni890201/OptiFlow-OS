@@ -36,7 +36,12 @@ function sanitizePath(path: string): string {
 
 export function trackPageView(path: string, title: string, role?: string): void {
   const trackPath = sanitizePath(path)
-  const event: PageView = { path: trackPath, title, role: role ? `role:${role}` : undefined, timestamp: new Date().toISOString() }
+  const event: PageView = {
+    path: trackPath,
+    title,
+    role: role ? `role:${role}` : undefined,
+    timestamp: new Date().toISOString(),
+  }
   pageViews.push(event)
   if (pageViews.length > MAX_SAMPLES) pageViews.shift()
   logger.debug('Analytics', `Page view: ${title}`, { path: trackPath, role })
@@ -75,7 +80,9 @@ export function getAnalyticsSnapshot(): {
     .slice(0, 10)
 
   const featureCounts = new Map<string, number>()
-  featureEvents.forEach((f) => featureCounts.set(f.feature, (featureCounts.get(f.feature) || 0) + 1))
+  featureEvents.forEach((f) =>
+    featureCounts.set(f.feature, (featureCounts.get(f.feature) || 0) + 1),
+  )
   const featureUsage = Array.from(featureCounts.entries())
     .map(([feature, count]) => ({ feature, count }))
     .sort((a, b) => b.count - a.count)

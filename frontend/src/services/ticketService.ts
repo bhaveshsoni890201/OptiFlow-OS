@@ -37,11 +37,18 @@ class TicketService extends BaseService {
   }
 
   async addTicketComment(ticketId: string, text: string, author: string): Promise<void> {
-    await this.mutate('post', endpoints.tickets.addComment(ticketId), { text, author }, [`ticket:${ticketId}`])
+    await this.mutate('post', endpoints.tickets.addComment(ticketId), { text, author }, [
+      `ticket:${ticketId}`,
+    ])
   }
 
   async closeTicket(ticketId: string, resolutionNotes: string): Promise<void> {
-    await this.mutate('post', endpoints.tickets.close(ticketId), { resolution_notes: resolutionNotes }, [`ticket:${ticketId}`])
+    await this.mutate(
+      'post',
+      endpoints.tickets.close(ticketId),
+      { resolution_notes: resolutionNotes },
+      [`ticket:${ticketId}`],
+    )
   }
 
   async reopenTicket(ticketId: string): Promise<void> {
@@ -49,11 +56,15 @@ class TicketService extends BaseService {
   }
 
   async assignTicket(ticketId: string, assignedTo: string): Promise<void> {
-    await this.mutate('post', endpoints.tickets.assign(ticketId), { assigned_to: assignedTo }, [`ticket:${ticketId}`])
+    await this.mutate('post', endpoints.tickets.assign(ticketId), { assigned_to: assignedTo }, [
+      `ticket:${ticketId}`,
+    ])
   }
 
   async escalateTicket(ticketId: string, reason: string): Promise<void> {
-    await this.mutate('post', endpoints.tickets.escalate(ticketId), { reason }, [`ticket:${ticketId}`])
+    await this.mutate('post', endpoints.tickets.escalate(ticketId), { reason }, [
+      `ticket:${ticketId}`,
+    ])
   }
 }
 
@@ -61,11 +72,16 @@ const ticketService = new TicketService()
 
 export const getHelpTickets = () => ticketService.getHelpTickets()
 export const getHelpTicket = (id: string) => ticketService.getHelpTicket(id)
-export const createHelpTicket = (ticket: Partial<HelpTicket>) => ticketService.createHelpTicket(ticket)
-export const updateHelpTicket = (id: string, data: Partial<HelpTicket>) => ticketService.updateHelpTicket(id, data)
+export const createHelpTicket = (ticket: Partial<HelpTicket>) =>
+  ticketService.createHelpTicket(ticket)
+export const updateHelpTicket = (id: string, data: Partial<HelpTicket>) =>
+  ticketService.updateHelpTicket(id, data)
 export const addTicketComment = (ticketId: string, text: string, author: string) =>
   ticketService.addTicketComment(ticketId, text, author)
-export const closeTicket = (ticketId: string, resolutionNotes: string) => ticketService.closeTicket(ticketId, resolutionNotes)
+export const closeTicket = (ticketId: string, resolutionNotes: string) =>
+  ticketService.closeTicket(ticketId, resolutionNotes)
 export const reopenTicket = (ticketId: string) => ticketService.reopenTicket(ticketId)
-export const assignTicket = (ticketId: string, assignedTo: string) => ticketService.assignTicket(ticketId, assignedTo)
-export const escalateTicket = (ticketId: string, reason: string) => ticketService.escalateTicket(ticketId, reason)
+export const assignTicket = (ticketId: string, assignedTo: string) =>
+  ticketService.assignTicket(ticketId, assignedTo)
+export const escalateTicket = (ticketId: string, reason: string) =>
+  ticketService.escalateTicket(ticketId, reason)

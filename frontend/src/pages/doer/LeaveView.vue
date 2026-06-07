@@ -221,315 +221,367 @@ function statusBadgeClass(status: LeaveStatus): string {
       return 'bg-danger-50 text-danger-600'
     case 'pending':
       return 'bg-warning-50 text-warning-500'
+    case 'escalated':
+      return 'bg-orange-50 text-orange-600'
+    case 'archived':
+      return 'bg-slate-50 text-slate-400'
   }
+  return 'bg-neutral-50 text-neutral-500'
+}
+
+function selectBuddy(b: { id: string; name: string }) {
+  formBuddy.value = b.id
+  buddySearch.value = b.name
+  showBuddyDropdown.value = false
 }
 </script>
 
 <template>
   <div class="flex items-center justify-between">
-      <h1 class="text-h2 text-neutral-900">{{ $t('leave.title') }}</h1>
-      <button
-        class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors min-h-touch"
-        @click="openApplyForm"
-      >
-        <CalendarDaysIcon class="h-4 w-4" />
-        {{ $t('leave.applyForLeave') }}
-      </button>
-    </div>
+    <h1 class="text-h2 text-neutral-900">{{ $t('leave.title') }}</h1>
+    <button
+      class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors min-h-touch"
+      @click="openApplyForm"
+    >
+      <CalendarDaysIcon class="h-4 w-4" />
+      {{ $t('leave.applyForLeave') }}
+    </button>
+  </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <div
+      v-for="b in balances"
+      :key="b.type"
+      class="bg-white rounded-lg shadow-card p-4 flex items-center justify-between"
+    >
+      <div>
+        <p class="text-caption text-neutral-500">{{ leaveTypeLabel(b.type) }}</p>
+        <p class="text-display mt-1" :class="b.color">{{ b.remaining }}</p>
+        <p class="text-caption text-neutral-400">
+          {{ $t('leave.usedOfTotal', { used: b.used, total: b.total }) }}
+        </p>
+      </div>
       <div
-        v-for="b in balances"
-        :key="b.type"
-        class="bg-white rounded-lg shadow-card p-4 flex items-center justify-between"
+        class="h-10 w-10 rounded-full flex items-center justify-center text-caption font-bold"
+        :class="b.bg + ' ' + b.color"
       >
-        <div>
-          <p class="text-caption text-neutral-500">{{ leaveTypeLabel(b.type) }}</p>
-          <p class="text-display mt-1" :class="b.color">{{ b.remaining }}</p>
-          <p class="text-caption text-neutral-400">{{ $t('leave.usedOfTotal', { used: b.used, total: b.total }) }}</p>
-        </div>
-        <div
-          class="h-10 w-10 rounded-full flex items-center justify-center text-caption font-bold"
-          :class="b.bg + ' ' + b.color"
-        >
-          {{ Math.round((b.used / b.total) * 100) }}%
+        {{ Math.round((b.used / b.total) * 100) }}%
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div v-if="loading" class="space-y-3 p-4" aria-live="polite">
+    <OptSkeleton variant="rectangular" height="20px" />
+    <OptSkeleton variant="rectangular" height="16px" />
+    <OptSkeleton variant="rectangular" height="16px" />
+    <OptSkeleton variant="rectangular" height="16px" />
+  </div>
+
+  <!-- Error state -->
+  <div v-else-if="error" class="card p-6 text-center" role="alert" aria-live="polite">
+    <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
+    <p class="text-body-strong text-neutral-900 mb-1">{{ $t('leave.failedToLoad') }}</p>
+    <p class="text-body text-neutral-500">{{ error }}</p>
+    <button
+      class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
+      @click="fetchLeave"
+    >
+      {{ $t('common.retry') }}
+    </button>
+  </div>
+
+  <div v-else class="bg-white rounded-lg shadow-card">
+    <div class="p-4 sm:p-6 border-b border-neutral-100">
+      <h2 class="text-h3 text-neutral-900">{{ $t('leave.myRequests') }}</h2>
+    </div>
+
+    <OptEmptyState
+      v-if="myRequests.length === 0"
+      type="leave"
+      :title="$t('leave.emptyState.noRequests')"
+      :description="$t('leave.emptyState.tapToApply')"
+      :action-label="$t('leave.applyLeave')"
+      @action="showApplyForm = true"
+    />
+
+    <div v-else class="divide-y divide-neutral-100">
+      <div
+        v-for="req in paginatedRequests"
+        :key="req.id"
+        class="p-4 sm:p-5 hover:bg-neutral-50 transition-colors"
+      >
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-body-strong text-neutral-900">{{
+                leaveTypeLabel(req.leave_type)
+              }}</span>
+              <span
+                class="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-semibold"
+                :class="statusBadgeClass(req.status)"
+              >
+                {{ $t('leave.statusDisplay.' + req.status) }}
+              </span>
+              <PendingSyncChip entity-type="leave" :entity-id="req.id" />
+            </div>
+            <p class="text-caption text-neutral-500">
+              {{ formatDateShort(req.start_date) }}
+              <template v-if="req.start_date !== req.end_date">
+                —
+                {{ formatDateShort(req.end_date) }}
+              </template>
+              <span class="ml-1"
+                >· {{ req.total_days }}
+                {{ $t('leave.' + (req.total_days === 1 ? 'day' : 'days')) }}</span
+              >
+            </p>
+            <p class="text-caption text-neutral-400 mt-0.5">
+              {{ $t('leave.buddy', { name: req.buddy_name }) }}
+              <span v-if="req.rejection_reason" class="block text-danger-600 mt-1"
+                >{{ $t('leave.form.reason') }}: {{ req.rejection_reason }}</span
+              >
+            </p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span
+              v-if="req.status === 'approved'"
+              class="text-caption text-success-600 font-semibold whitespace-nowrap"
+              >{{ $t('leave.tasksTransferred') }}</span
+            >
+            <button
+              v-if="req.status === 'rejected' && req.rejection_reason"
+              class="text-caption text-brand-600 font-semibold whitespace-nowrap hover:text-brand-700"
+              @click="rejectDetail = req.id"
+            >
+              {{ $t('leave.viewReason') }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Loading state -->
-    <div v-if="loading" class="space-y-3 p-4" aria-live="polite">
-      <OptSkeleton variant="rectangular" height="20px" />
-      <OptSkeleton variant="rectangular" height="16px" />
-      <OptSkeleton variant="rectangular" height="16px" />
-      <OptSkeleton variant="rectangular" height="16px" />
-    </div>
+    <OptPagination
+      :current-page="requestsCurrentPage"
+      :total-pages="requestsTotalPages"
+      :total-items="requestsTotalItems"
+      :page-size="20"
+      @page-change="requestsCurrentPage = $event"
+    />
+  </div>
 
-    <!-- Error state -->
-    <div v-else-if="error" class="card p-6 text-center" role="alert" aria-live="polite">
-      <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
-      <p class="text-body-strong text-neutral-900 mb-1">{{ $t('leave.failedToLoad') }}</p>
-      <p class="text-body text-neutral-500">{{ error }}</p>
-      <button
-        class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
-        @click="fetchLeave"
+  <teleport to="body">
+    <div
+      v-if="showApplyForm"
+      class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 animate-fade-in"
+      aria-hidden="true"
+    >
+      <div
+        class="bg-white w-full sm:max-w-lg rounded-t-xl sm:rounded-lg shadow-modal max-h-[90vh] overflow-y-auto animate-slide-up"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Apply for Leave"
       >
-        {{ $t('common.retry') }}
-      </button>
-    </div>
+        <div class="flex items-center justify-between p-4 border-b border-neutral-100">
+          <h2 class="text-h3 text-neutral-900">{{ $t('leave.applyForLeave') }}</h2>
+          <button
+            class="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400"
+            aria-label="Close"
+            @click="closeForm"
+          >
+            <XMarkIcon class="h-5 w-5" />
+          </button>
+        </div>
 
-    <div v-else class="bg-white rounded-lg shadow-card">
-      <div class="p-4 sm:p-6 border-b border-neutral-100">
-        <h2 class="text-h3 text-neutral-900">{{ $t('leave.myRequests') }}</h2>
-      </div>
+        <div v-if="formSubmitted" class="p-6 text-center">
+          <CheckCircleSolid class="h-12 w-12 text-success-600 mx-auto mb-3" />
+          <p class="text-body-strong text-neutral-900 mb-1">{{ $t('leave.leaveRequested') }}</p>
+          <p class="text-body text-neutral-500 mb-4">
+            {{ $t('leave.pendingMessage', { name: buddyName }) }}
+          </p>
+          <button
+            class="w-full py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700"
+            @click="closeForm"
+          >
+            {{ $t('common.done') }}
+          </button>
+        </div>
 
-      <OptEmptyState v-if="myRequests.length === 0" type="leave" :title="$t('leave.emptyState.noRequests')" :description="$t('leave.emptyState.tapToApply')" :action-label="$t('leave.applyLeave')" @action="showApplyForm = true" />
+        <form v-else class="p-4 space-y-4" @submit.prevent="submitLeave">
+          <div>
+            <label class="block text-caption font-semibold text-neutral-700 mb-1">{{
+              $t('leave.form.leaveType')
+            }}</label>
+            <select
+              :id="'input-type'"
+              v-model="formType"
+              class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
+              :class="formErrors['type'] ? 'border-danger-500' : ''"
+              :aria-describedby="formErrors['type'] ? 'error-type' : undefined"
+            >
+              <option value="Casual Leave">{{ $t('leave.leaveTypes.casual') }}</option>
+              <option value="Sick Leave">{{ $t('leave.leaveTypes.sick') }}</option>
+              <option value="Earned Leave">{{ $t('leave.leaveTypes.earned') }}</option>
+            </select>
+            <p
+              v-if="formErrors['type']"
+              :id="'error-type'"
+              class="text-caption text-danger-600 mt-1"
+            >
+              {{ formErrors['type'] }}
+            </p>
+          </div>
 
-      <div v-else class="divide-y divide-neutral-100">
-        <div
-          v-for="req in paginatedRequests"
-          :key="req.id"
-          class="p-4 sm:p-5 hover:bg-neutral-50 transition-colors"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-body-strong text-neutral-900">{{ leaveTypeLabel(req.leave_type) }}</span>
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded-full text-caption font-semibold"
-                  :class="statusBadgeClass(req.status)"
-                >
-                  {{ $t('leave.statusDisplay.' + req.status) }}
-                </span>
-                <PendingSyncChip entity-type="leave" :entity-id="req.id" />
-              </div>
-              <p class="text-caption text-neutral-500">
-                {{
-                  formatDateShort(req.start_date)
-                }}
-                <template v-if="req.start_date !== req.end_date">
-                  —
-                  {{
-                    formatDateShort(req.end_date)
-                  }}
-                </template>
-                <span class="ml-1"
-                  >· {{ req.total_days }} {{ $t('leave.' + (req.total_days === 1 ? 'day' : 'days')) }}</span
-                >
-              </p>
-              <p class="text-caption text-neutral-400 mt-0.5">
-                {{ $t('leave.buddy', { name: req.buddy_name }) }}
-                <span v-if="req.rejection_reason" class="block text-danger-600 mt-1"
-                  >{{ $t('leave.form.reason') }}: {{ req.rejection_reason }}</span
-                >
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-caption font-semibold text-neutral-700 mb-1">{{
+                $t('leave.form.startDate')
+              }}</label>
+              <input
+                :id="'input-start'"
+                v-model="formStart"
+                type="date"
+                class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
+                :class="formErrors['start'] ? 'border-danger-500' : ''"
+                :aria-describedby="formErrors['start'] ? 'error-start' : undefined"
+              />
+              <p
+                v-if="formErrors['start']"
+                :id="'error-start'"
+                class="text-caption text-danger-600 mt-1"
+              >
+                {{ formErrors['start'] }}
               </p>
             </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span
-                v-if="req.status === 'approved'"
-                class="text-caption text-success-600 font-semibold whitespace-nowrap"
-                >{{ $t('leave.tasksTransferred') }}</span
+            <div>
+              <label class="block text-caption font-semibold text-neutral-700 mb-1">{{
+                $t('leave.form.endDate')
+              }}</label>
+              <input
+                :id="'input-end'"
+                v-model="formEnd"
+                type="date"
+                class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
+                :class="formErrors['end'] ? 'border-danger-500' : ''"
+                :aria-describedby="formErrors['end'] ? 'error-end' : undefined"
+              />
+              <p
+                v-if="formErrors['end']"
+                :id="'error-end'"
+                class="text-caption text-danger-600 mt-1"
               >
+                {{ formErrors['end'] }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-if="formStart && formEnd && formDays > 0"
+            class="flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 text-caption"
+          >
+            <span class="text-neutral-500">{{ $t('leave.form.totalDays') }}</span>
+            <span class="font-semibold text-neutral-900">{{ formDays }}</span>
+          </div>
+
+          <div
+            v-if="selectedBalance && formDays > selectedBalance.remaining"
+            class="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-danger-50 text-caption text-danger-600"
+          >
+            <ExclamationTriangleIcon class="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{{
+              $t('leave.form.insufficientBalance', {
+                type: selectedBalance.type,
+                remaining: selectedBalance.remaining,
+              })
+            }}</span>
+          </div>
+
+          <div>
+            <label class="block text-caption font-semibold text-neutral-700 mb-1"
+              >{{ $t('leave.form.reason') }} <span class="text-danger-500">*</span></label
+            >
+            <textarea
+              :id="'input-reason'"
+              v-model="formReason"
+              rows="3"
+              class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none resize-none"
+              :class="formErrors['reason'] ? 'border-danger-500' : ''"
+              :placeholder="$t('leave.form.reasonPlaceholder')"
+              :aria-describedby="formErrors['reason'] ? 'error-reason' : undefined"
+            />
+            <p
+              v-if="formErrors['reason']"
+              :id="'error-reason'"
+              class="text-caption text-danger-600 mt-1"
+            >
+              {{ formErrors['reason'] }}
+            </p>
+          </div>
+
+          <div class="relative">
+            <label class="block text-caption font-semibold text-neutral-700 mb-1"
+              >{{ $t('leave.form.buddy') }} <span class="text-danger-500">*</span></label
+            >
+            <div class="relative">
+              <MagnifyingGlassIcon
+                class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400"
+              />
+              <input
+                :id="'input-buddy'"
+                v-model="buddySearch"
+                type="text"
+                :placeholder="$t('leave.form.searchByName')"
+                class="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
+                :class="formErrors['buddy'] ? 'border-danger-500' : ''"
+                :aria-describedby="formErrors['buddy'] ? 'error-buddy' : undefined"
+                @focus="showBuddyDropdown = true"
+                @blur="handleBuddyBlur"
+              />
+            </div>
+            <div
+              v-if="showBuddyDropdown && filteredBuddies.length > 0"
+              class="absolute z-10 top-full mt-1 w-full bg-white border border-neutral-200 rounded-lg shadow-elevated max-h-48 overflow-y-auto"
+            >
               <button
-                v-if="req.status === 'rejected' && req.rejection_reason"
-                class="text-caption text-brand-600 font-semibold whitespace-nowrap hover:text-brand-700"
-                @click="rejectDetail = req.id"
+                v-for="b in filteredBuddies"
+                :key="b.id"
+                type="button"
+                class="w-full text-left px-3 py-2.5 hover:bg-neutral-50 text-body text-neutral-700 flex items-center gap-2"
+                @mousedown.prevent="selectBuddy(b)"
               >
-                {{ $t('leave.viewReason') }}
+                <UserIcon class="h-4 w-4 text-neutral-400" />
+                <div>
+                  <span class="font-medium">{{ b.name }}</span>
+                  <span class="text-caption text-neutral-400 ml-1"
+                    >· {{ b.designation }}, {{ b.dept }}</span
+                  >
+                </div>
               </button>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <OptPagination
-        :current-page="requestsCurrentPage"
-        :total-pages="requestsTotalPages"
-        :total-items="requestsTotalItems"
-        :page-size="20"
-        @page-change="requestsCurrentPage = $event"
-      />
-    </div>
-
-    <teleport to="body">
-      <div
-        v-if="showApplyForm"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 animate-fade-in"
-        aria-hidden="true"
-      >
-        <div
-          class="bg-white w-full sm:max-w-lg rounded-t-xl sm:rounded-lg shadow-modal max-h-[90vh] overflow-y-auto animate-slide-up"
-          role="dialog" aria-modal="true" aria-label="Apply for Leave"
-        >
-          <div class="flex items-center justify-between p-4 border-b border-neutral-100">
-            <h2 class="text-h3 text-neutral-900">{{ $t('leave.applyForLeave') }}</h2>
-            <button class="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400" @click="closeForm" aria-label="Close">
-              <XMarkIcon class="h-5 w-5" />
-            </button>
-          </div>
-
-          <div v-if="formSubmitted" class="p-6 text-center">
-            <CheckCircleSolid class="h-12 w-12 text-success-600 mx-auto mb-3" />
-            <p class="text-body-strong text-neutral-900 mb-1">{{ $t('leave.leaveRequested') }}</p>
-            <p class="text-body text-neutral-500 mb-4">
-              {{ $t('leave.pendingMessage', { name: buddyName }) }}
+            <div
+              v-if="formBuddy && !showBuddyDropdown"
+              class="flex items-center gap-1.5 mt-1.5 text-caption text-neutral-500"
+            >
+              <CheckCircleSolid class="h-3.5 w-3.5 text-success-600" />
+              {{ $t('leave.form.selected', { name: buddyName }) }}
+            </div>
+            <p
+              v-if="formErrors['buddy']"
+              :id="'error-buddy'"
+              class="text-caption text-danger-600 mt-1"
+            >
+              {{ formErrors['buddy'] }}
             </p>
-            <button
-              class="w-full py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700"
-              @click="closeForm"
-            >
-              {{ $t('common.done') }}
-            </button>
           </div>
 
-          <form v-else class="p-4 space-y-4" @submit.prevent="submitLeave">
-            <div>
-              <label class="block text-caption font-semibold text-neutral-700 mb-1">{{ $t('leave.form.leaveType') }}</label>
-              <select
-                v-model="formType"
-                class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
-                :class="formErrors['type'] ? 'border-danger-500' : ''"
-                :id="'input-type'"
-                :aria-describedby="formErrors['type'] ? 'error-type' : undefined"
-              >
-                <option value="Casual Leave">{{ $t('leave.leaveTypes.casual') }}</option>
-                <option value="Sick Leave">{{ $t('leave.leaveTypes.sick') }}</option>
-                <option value="Earned Leave">{{ $t('leave.leaveTypes.earned') }}</option>
-              </select>
-              <p v-if="formErrors['type']" class="text-caption text-danger-600 mt-1" :id="'error-type'">
-                {{ formErrors['type'] }}
-              </p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-caption font-semibold text-neutral-700 mb-1"
-                  >{{ $t('leave.form.startDate') }}</label
-                >
-                <input
-                  v-model="formStart"
-                  type="date"
-                  class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
-                  :class="formErrors['start'] ? 'border-danger-500' : ''"
-                  :id="'input-start'"
-                  :aria-describedby="formErrors['start'] ? 'error-start' : undefined"
-                />
-                <p v-if="formErrors['start']" class="text-caption text-danger-600 mt-1" :id="'error-start'">
-                  {{ formErrors['start'] }}
-                </p>
-              </div>
-              <div>
-                <label class="block text-caption font-semibold text-neutral-700 mb-1">{{ $t('leave.form.endDate') }}</label>
-                <input
-                  v-model="formEnd"
-                  type="date"
-                  class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
-                  :class="formErrors['end'] ? 'border-danger-500' : ''"
-                  :id="'input-end'"
-                  :aria-describedby="formErrors['end'] ? 'error-end' : undefined"
-                />
-                <p v-if="formErrors['end']" class="text-caption text-danger-600 mt-1" :id="'error-end'">
-                  {{ formErrors['end'] }}
-                </p>
-              </div>
-            </div>
-
-            <div
-              v-if="formStart && formEnd && formDays > 0"
-              class="flex items-center justify-between px-3 py-2 rounded-lg bg-neutral-50 text-caption"
-            >
-              <span class="text-neutral-500">{{ $t('leave.form.totalDays') }}</span>
-              <span class="font-semibold text-neutral-900">{{ formDays }}</span>
-            </div>
-
-            <div
-              v-if="selectedBalance && formDays > selectedBalance.remaining"
-              class="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-danger-50 text-caption text-danger-600"
-            >
-              <ExclamationTriangleIcon class="h-4 w-4 mt-0.5 flex-shrink-0" />
-              <span
-                >{{ $t('leave.form.insufficientBalance', { type: selectedBalance.type, remaining: selectedBalance.remaining }) }}</span
-              >
-            </div>
-
-            <div>
-              <label class="block text-caption font-semibold text-neutral-700 mb-1"
-                >{{ $t('leave.form.reason') }} <span class="text-danger-500">*</span></label
-              >
-              <textarea
-                v-model="formReason"
-                rows="3"
-                class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none resize-none"
-                :class="formErrors['reason'] ? 'border-danger-500' : ''"
-                :placeholder="$t('leave.form.reasonPlaceholder')"
-                :id="'input-reason'"
-                :aria-describedby="formErrors['reason'] ? 'error-reason' : undefined"
-              />
-              <p v-if="formErrors['reason']" class="text-caption text-danger-600 mt-1" :id="'error-reason'">
-                {{ formErrors['reason'] }}
-              </p>
-            </div>
-
-            <div class="relative">
-              <label class="block text-caption font-semibold text-neutral-700 mb-1"
-                >{{ $t('leave.form.buddy') }} <span class="text-danger-500">*</span></label
-              >
-              <div class="relative">
-                <MagnifyingGlassIcon
-                  class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400"
-                />
-                <input
-                  v-model="buddySearch"
-                  type="text"
-                  :placeholder="$t('leave.form.searchByName')"
-                  class="w-full pl-9 pr-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
-                  :class="formErrors['buddy'] ? 'border-danger-500' : ''"
-                  @focus="showBuddyDropdown = true"
-                  @blur="handleBuddyBlur"
-                  :id="'input-buddy'"
-                  :aria-describedby="formErrors['buddy'] ? 'error-buddy' : undefined"
-                />
-              </div>
-              <div
-                v-if="showBuddyDropdown && filteredBuddies.length > 0"
-                class="absolute z-10 top-full mt-1 w-full bg-white border border-neutral-200 rounded-lg shadow-elevated max-h-48 overflow-y-auto"
-              >
-                <button
-                  v-for="b in filteredBuddies"
-                  :key="b.id"
-                  type="button"
-                  class="w-full text-left px-3 py-2.5 hover:bg-neutral-50 text-body text-neutral-700 flex items-center gap-2"
-                  @mousedown.prevent="formBuddy = b.id; buddySearch = b.name; showBuddyDropdown = false"
-                >
-                  <UserIcon class="h-4 w-4 text-neutral-400" />
-                  <div>
-                    <span class="font-medium">{{ b.name }}</span>
-                    <span class="text-caption text-neutral-400 ml-1"
-                      >· {{ b.designation }}, {{ b.dept }}</span
-                    >
-                  </div>
-                </button>
-              </div>
-              <div
-                v-if="formBuddy && !showBuddyDropdown"
-                class="flex items-center gap-1.5 mt-1.5 text-caption text-neutral-500"
-              >
-                <CheckCircleSolid class="h-3.5 w-3.5 text-success-600" />
-                {{ $t('leave.form.selected', { name: buddyName }) }}
-              </div>
-              <p v-if="formErrors['buddy']" class="text-caption text-danger-600 mt-1" :id="'error-buddy'">
-                {{ formErrors['buddy'] }}
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              class="w-full py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
-            >
-              {{ $t('leave.form.submit') }}
-            </button>
-          </form>
-        </div>
+          <button
+            type="submit"
+            class="w-full py-2.5 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
+          >
+            {{ $t('leave.form.submit') }}
+          </button>
+        </form>
       </div>
-    </teleport>
+    </div>
+  </teleport>
 </template>

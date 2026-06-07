@@ -86,10 +86,12 @@ const chartData = computed(() => {
       const d = new Date(r.created_on)
       return d.getDate() > i * 7 && d.getDate() <= (i + 1) * 7
     }).length,
-    delays: records.filter((r) => r.delay_days > 2).filter((r) => {
-      const d = new Date(r.created_on)
-      return d.getDate() > i * 7 && d.getDate() <= (i + 1) * 7
-    }).length,
+    delays: records
+      .filter((r) => r.delay_days > 2)
+      .filter((r) => {
+        const d = new Date(r.created_on)
+        return d.getDate() > i * 7 && d.getDate() <= (i + 1) * 7
+      }).length,
   }))
 })
 
@@ -140,7 +142,7 @@ async function loadDashboard() {
       .slice(0, 5)
       .map((r, i) => ({
         id: i + 1,
-        severity: r.delay_days >= 7 ? 'high' as const : 'medium' as const,
+        severity: r.delay_days >= 7 ? ('high' as const) : ('medium' as const),
         message: `${r.employee_name}: ${r.task_title} (${r.delay_days}d overdue)`,
         time: formatDateShort(r.last_activity),
       }))
@@ -358,7 +360,8 @@ const approvalIcons: Record<string, any> = {
                       ? 'bg-amber-200 text-amber-800'
                       : 'bg-blue-200 text-blue-800'
                 "
-              >{{ row.severity }}</span>
+                >{{ row.severity }}</span
+              >
             </template>
           </OptTable>
         </div>

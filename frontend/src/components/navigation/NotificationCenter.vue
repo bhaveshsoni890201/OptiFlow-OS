@@ -236,7 +236,9 @@ watch(
             >
               <BellIcon class="w-12 h-12 mb-2" />
               <p class="text-body">No notifications</p>
-              <p class="text-caption text-neutral-500 mt-1">When updates arrive, they'll appear here.</p>
+              <p class="text-caption text-neutral-500 mt-1">
+                When updates arrive, they'll appear here.
+              </p>
             </div>
             <div
               v-for="item in filteredNotifications"

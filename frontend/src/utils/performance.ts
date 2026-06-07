@@ -11,7 +11,10 @@ export function endMeasure(name: string, context?: string): number | undefined {
   if (start === undefined) return undefined
   const duration = performance.now() - start
   marks.delete(name)
-  logger.debug('Perf', `${name} took ${duration.toFixed(1)}ms`, { context, durationMs: +duration.toFixed(1) })
+  logger.debug('Perf', `${name} took ${duration.toFixed(1)}ms`, {
+    context,
+    durationMs: +duration.toFixed(1),
+  })
 
   const entries = JSON.parse(sessionStorage.getItem('optiflow-route-timing') || '[]')
   entries.push({ name, durationMs: +duration.toFixed(1), timestamp: new Date().toISOString() })

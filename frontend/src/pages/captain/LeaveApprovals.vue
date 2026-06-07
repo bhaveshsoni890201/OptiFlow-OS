@@ -34,7 +34,9 @@ const filteredRequests = computed(() => {
   return all.filter((r) => r.status === activeTab.value)
 })
 
-const pendingCount = computed(() => workflowStore.leaveRequests.filter((r) => r.status === 'pending').length)
+const pendingCount = computed(
+  () => workflowStore.leaveRequests.filter((r) => r.status === 'pending').length,
+)
 
 const leaveTypeColors: Record<string, string> = {
   annual: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -69,14 +71,21 @@ const statusColors: Record<string, string> = {
 }
 
 function initials(name: string): string {
-  return name.split(' ').map((s) => s[0]).join('').slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .map((s) => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 async function handleApprove(request: LeaveRequest) {
   await workflowStore.approveLeave(request.id, overrideBuddyId.value || undefined)
   approveSuccess.value = `Approved — tasks transferred to ${request.buddy_name}`
   overrideBuddyId.value = ''
-  setTimeout(() => { approveSuccess.value = null }, 4000)
+  setTimeout(() => {
+    approveSuccess.value = null
+  }, 4000)
 }
 
 function openReject(id: string) {
@@ -134,10 +143,7 @@ onMounted(loadApprovals)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadApprovals()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadApprovals()">
           Retry
         </button>
       </div>
@@ -226,7 +232,8 @@ onMounted(loadApprovals)
                 <p class="text-xs text-slate-400">Reason: {{ req.reason }}</p>
                 <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
                   <span
-                    ><UserGroupIcon class="w-3 h-3 inline mr-0.5" /> Buddy: {{ req.buddy_name || 'Unassigned' }}</span
+                    ><UserGroupIcon class="w-3 h-3 inline mr-0.5" /> Buddy:
+                    {{ req.buddy_name || 'Unassigned' }}</span
                   >
                 </div>
                 <p
@@ -271,7 +278,10 @@ onMounted(loadApprovals)
                 class="w-full mt-1 px-2 py-1 text-xs border border-slate-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
-            <div v-else-if="req.status === 'approved'" class="flex flex-col items-end gap-1 shrink-0">
+            <div
+              v-else-if="req.status === 'approved'"
+              class="flex flex-col items-end gap-1 shrink-0"
+            >
               <span
                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 text-xs font-medium"
                 ><CheckCircleSolid class="w-4 h-4" /> Approved</span
@@ -283,7 +293,10 @@ onMounted(loadApprovals)
                 <ArchiveBoxIcon class="w-3.5 h-3.5" /> Archive
               </button>
             </div>
-            <div v-else-if="req.status === 'rejected'" class="flex flex-col items-end gap-1 shrink-0">
+            <div
+              v-else-if="req.status === 'rejected'"
+              class="flex flex-col items-end gap-1 shrink-0"
+            >
               <span
                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-100 text-red-700 text-xs font-medium"
                 ><XCircleIcon class="w-4 h-4" /> Rejected</span

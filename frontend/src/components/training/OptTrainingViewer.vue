@@ -89,7 +89,9 @@ function getIcon() {
 <template>
   <div class="min-h-[200px]">
     <div v-if="loading" class="flex items-center justify-center min-h-[200px]">
-      <div class="h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin" />
+      <div
+        class="h-8 w-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"
+      />
     </div>
 
     <div
@@ -98,10 +100,7 @@ function getIcon() {
     >
       <XCircleIcon class="h-8 w-8 text-danger-500 mx-auto mb-2" />
       <p class="text-body text-neutral-500">Failed to load content. Please try again.</p>
-      <button
-        class="mt-2 text-button text-brand-600 hover:text-brand-700"
-        @click="loadContent"
-      >
+      <button class="mt-2 text-button text-brand-600 hover:text-brand-700" @click="loadContent">
         Retry
       </button>
     </div>

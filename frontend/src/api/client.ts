@@ -98,7 +98,10 @@ export interface ApiResponse<T> {
   error?: string
 }
 
-async function unwrap<T>(response: AxiosResponse<ApiResponse<T>>, schema?: { parse: (data: unknown) => unknown }): Promise<T> {
+async function unwrap<T>(
+  response: AxiosResponse<ApiResponse<T>>,
+  schema?: { parse: (data: unknown) => unknown },
+): Promise<T> {
   if (response.data.status === 'error') throw new Error(response.data.error || 'API error')
   const data = response.data.message
   if (schema) {

@@ -197,7 +197,10 @@ onMounted(loadDepartments)
       />
     </div>
 
-    <div v-if="error" class="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between">
+    <div
+      v-if="error"
+      class="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between"
+    >
       <span class="text-sm text-red-600">{{ error }}</span>
       <button
         class="text-sm font-medium text-red-700 hover:text-red-800 underline"
@@ -448,4 +451,3 @@ onMounted(loadDepartments)
     </div>
   </div>
 </template>
-

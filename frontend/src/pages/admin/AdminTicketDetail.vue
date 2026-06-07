@@ -64,7 +64,9 @@ async function fetchTicket() {
       ticket.value = result
     }
   } catch {
-    error.value = timedOut.value ? 'Request timed out. Please try again.' : t('ticketDetail.loadError')
+    error.value = timedOut.value
+      ? 'Request timed out. Please try again.'
+      : t('ticketDetail.loadError')
   }
   clearLoadTimeout()
   loading.value = false
@@ -111,7 +113,9 @@ function formatDate(d: string) {
       >
         <ArrowLeftIcon class="w-5 h-5" />
       </button>
-      <h1 class="text-h3 text-neutral-900 truncate flex-1">{{ loading ? '...' : ticket?.subject }}</h1>
+      <h1 class="text-h3 text-neutral-900 truncate flex-1">
+        {{ loading ? '...' : ticket?.subject }}
+      </h1>
     </div>
 
     <template v-if="loading">
@@ -184,7 +188,9 @@ function formatDate(d: string) {
                 </div>
                 <span
                   class="text-overline"
-                  :class="i <= currentStepIndex ? 'text-neutral-700 font-semibold' : 'text-neutral-400'"
+                  :class="
+                    i <= currentStepIndex ? 'text-neutral-700 font-semibold' : 'text-neutral-400'
+                  "
                 >
                   {{ $t('ticketDetail.statusDisplay.' + statusDisplayKey[step]) }}
                 </span>
@@ -192,7 +198,13 @@ function formatDate(d: string) {
               <div
                 v-if="i < statusSteps.length - 1"
                 class="flex-1 h-0.5 rounded-full"
-                :class="i < currentStepIndex ? 'bg-success-600' : i === currentStepIndex ? 'bg-brand-600' : 'bg-neutral-200'"
+                :class="
+                  i < currentStepIndex
+                    ? 'bg-success-600'
+                    : i === currentStepIndex
+                      ? 'bg-brand-600'
+                      : 'bg-neutral-200'
+                "
               ></div>
             </template>
           </div>
@@ -209,17 +221,31 @@ function formatDate(d: string) {
               <div
                 class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-caption font-bold flex-shrink-0"
               >
-                {{ (comment.author.split(' ').map((w: string) => w[0]).join('').slice(0, 2) || comment.author[0]).toUpperCase() }}
+                {{
+                  (
+                    comment.author
+                      .split(' ')
+                      .map((w: string) => w[0])
+                      .join('')
+                      .slice(0, 2) || comment.author[0]
+                  ).toUpperCase()
+                }}
               </div>
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="text-body-strong text-neutral-900">{{ comment.author }}</span>
-                  <span class="text-caption text-neutral-400">{{ formatDate(comment.created_on) }}</span>
+                  <span class="text-caption text-neutral-400">{{
+                    formatDate(comment.created_on)
+                  }}</span>
                 </div>
                 <p class="text-body text-neutral-700">{{ comment.text }}</p>
               </div>
             </div>
-            <OptEmptyState v-if="ticket.comments.length === 0" type="comments" :title="$t('ticketDetail.noComments')" />
+            <OptEmptyState
+              v-if="ticket.comments.length === 0"
+              type="comments"
+              :title="$t('ticketDetail.noComments')"
+            />
           </div>
 
           <div class="flex gap-2">

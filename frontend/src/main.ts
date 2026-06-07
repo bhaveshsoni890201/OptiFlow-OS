@@ -22,7 +22,8 @@ initErrorTracking()
 // Global unhandled promise rejection capture
 window.addEventListener('unhandledrejection', (event) => {
   const reason = event.reason
-  const message = reason instanceof Error ? reason.message : String(reason || 'Unknown promise rejection')
+  const message =
+    reason instanceof Error ? reason.message : String(reason || 'Unknown promise rejection')
   captureError(message, 'unhandledrejection', { reason: String(reason) })
 })
 

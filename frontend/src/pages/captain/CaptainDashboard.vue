@@ -140,7 +140,12 @@ const quickActions = ref<QuickAction[]>([
 ])
 
 function initials(name: string): string {
-  return name.split(' ').map((s) => s[0]).join('').slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .map((s) => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 }
 
 function getAlertBg(severity: AlertSeverity): string {
@@ -175,7 +180,9 @@ async function loadDashboard() {
     ])
 
     const activeRescues = rescueStore.activeRecords.length
-    const criticalCount = rescueStore.records.filter((r) => r.severity === 'admin_escalation').length
+    const criticalCount = rescueStore.records.filter(
+      (r) => r.severity === 'admin_escalation',
+    ).length
     const pendingLeave = workflowStore.leaveRequests.filter((r) => r.status === 'pending').length
     const doers = adminStore.employees.filter((e) => e.roles.includes('doer'))
     const delayedDoers = doers.filter((d) =>
@@ -240,9 +247,15 @@ async function loadDashboard() {
         avatar: initials(e.name),
         taskLoad: dueTasks.length,
         delaysCount: empRescues.length,
-        lastActivity: empRescues.length > 0
-          ? formatRelativeTime(empRescues.sort((a, b) => new Date(b.last_activity).getTime() - new Date(a.last_activity).getTime())[0].last_activity)
-          : 'N/A',
+        lastActivity:
+          empRescues.length > 0
+            ? formatRelativeTime(
+                empRescues.sort(
+                  (a, b) =>
+                    new Date(b.last_activity).getTime() - new Date(a.last_activity).getTime(),
+                )[0].last_activity,
+              )
+            : 'N/A',
       }
     })
   } catch {
@@ -253,6 +266,12 @@ async function loadDashboard() {
 }
 
 onMounted(loadDashboard)
+
+function retryLoad() {
+  loading.value = true
+  error.value = null
+  loadDashboard()
+}
 </script>
 
 <template>
@@ -272,7 +291,7 @@ onMounted(loadDashboard)
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
         <button
           class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loading = true; error = null; loadDashboard()"
+          @click="retryLoad"
         >
           Retry
         </button>
@@ -304,7 +323,15 @@ onMounted(loadDashboard)
           :key="alert.id"
           :title="alert.label"
           :value="alert.value"
-          :color="alert.severity === 'critical' ? 'danger' : alert.severity === 'warning' ? 'warning' : alert.severity === 'info' ? 'info' : 'success'"
+          :color="
+            alert.severity === 'critical'
+              ? 'danger'
+              : alert.severity === 'warning'
+                ? 'warning'
+                : alert.severity === 'info'
+                  ? 'info'
+                  : 'success'
+          "
         />
       </div>
 
@@ -368,28 +395,33 @@ onMounted(loadDashboard)
           <template #header>
             <div class="flex items-center justify-between w-full">
               <h2 class="text-sm font-semibold text-slate-900">Team Activity</h2>
-              <button class="text-xs text-blue-600 hover:underline" @click="router.push('/captain/team')">View all</button>
+              <button
+                class="text-xs text-blue-600 hover:underline"
+                @click="router.push('/captain/team')"
+              >
+                View all
+              </button>
             </div>
           </template>
           <div class="space-y-3">
+            <div
+              v-for="(member, idx) in teamMembers"
+              :key="idx"
+              class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+            >
               <div
-                v-for="(member, idx) in teamMembers"
-                :key="idx"
-                class="flex items-center gap-3 p-2.5 rounded-lg hover:bg-slate-50 transition-colors"
+                class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 shrink-0"
               >
-                <div
-                  class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 shrink-0"
-                >
-                  {{ member.avatar }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-medium text-slate-900 truncate">{{ member.name }}</p>
-                  <p class="text-xs text-slate-400">
-                    Tasks: {{ member.taskLoad }} &middot; Delays: {{ member.delaysCount }}
-                  </p>
-                </div>
-                <span class="text-xs text-slate-400">{{ member.lastActivity }}</span>
+                {{ member.avatar }}
               </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-slate-900 truncate">{{ member.name }}</p>
+                <p class="text-xs text-slate-400">
+                  Tasks: {{ member.taskLoad }} &middot; Delays: {{ member.delaysCount }}
+                </p>
+              </div>
+              <span class="text-xs text-slate-400">{{ member.lastActivity }}</span>
+            </div>
           </div>
         </OptCard>
       </div>
@@ -397,7 +429,9 @@ onMounted(loadDashboard)
       <!-- Review Queue -->
       <div v-if="reviewQueue.length > 0" class="bg-white rounded-xl border border-slate-200 p-5">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-sm font-semibold text-slate-900">Pending Review ({{ reviewQueue.length }})</h2>
+          <h2 class="text-sm font-semibold text-slate-900">
+            Pending Review ({{ reviewQueue.length }})
+          </h2>
           <span class="text-xs text-slate-400">Completed tasks awaiting approval</span>
         </div>
         <div class="space-y-2">

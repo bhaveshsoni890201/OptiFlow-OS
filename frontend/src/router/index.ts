@@ -12,10 +12,18 @@ function lazyLoad(loader: () => Promise<any>): () => Promise<any> {
               h('div', { class: 'text-center' }, [
                 h('div', { class: 'text-danger-500 text-4xl mb-4' }, '\u26A0'),
                 h('h2', { class: 'text-h2 text-neutral-900 mb-2' }, 'Page failed to load'),
-                h('p', { class: 'text-body text-neutral-500 mb-4' }, 'A network error occurred while loading this page.'),
+                h(
+                  'p',
+                  { class: 'text-body text-neutral-500 mb-4' },
+                  'A network error occurred while loading this page.',
+                ),
                 h(
                   'a',
-                  { href: '/login', class: 'inline-block px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors' },
+                  {
+                    href: '/login',
+                    class:
+                      'inline-block px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors',
+                  },
                   'Go to Login',
                 ),
               ]),
@@ -359,17 +367,23 @@ router.beforeEach((to, from, next) => {
   const store = useStore()
 
   // Resolve effective meta by walking matched route records (children inherit from parents)
-  const routeMeta = to.matched.reduce((acc, record) => {
-    if (record.meta.requiresAuth !== undefined) acc.requiresAuth = record.meta.requiresAuth
-    if (record.meta.role !== undefined) acc.role = record.meta.role
-    return acc
-  }, { requiresAuth: false, role: undefined as string | undefined })
+  const routeMeta = to.matched.reduce<{ requiresAuth: boolean; role: string | undefined }>(
+    (acc, record) => {
+      const meta = record.meta as Record<string, any>
+      if (meta.requiresAuth !== undefined) acc.requiresAuth = meta.requiresAuth
+      if (meta.role !== undefined) acc.role = meta.role
+      return acc
+    },
+    { requiresAuth: false, role: undefined },
+  )
 
   // 1. Requires auth but not authenticated → preserve deep-link, redirect to login
   if (routeMeta.requiresAuth && !store.isAuthenticated) {
     try {
       sessionStorage.setItem('optiflow-redirect', to.fullPath)
-    } catch { /* sessionStorage unavailable */ }
+    } catch {
+      /* sessionStorage unavailable */
+    }
     next('/login')
     return
   }
@@ -393,7 +407,10 @@ router.beforeEach((to, from, next) => {
 })
 
 router.onError((err) => {
-  if (err.message?.includes('Failed to fetch dynamically imported module') || err.message?.includes('Loading chunk')) {
+  if (
+    err.message?.includes('Failed to fetch dynamically imported module') ||
+    err.message?.includes('Loading chunk')
+  ) {
     window.location.href = '/login?error=chunk-load'
   }
 })

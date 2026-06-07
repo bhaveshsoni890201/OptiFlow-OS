@@ -43,7 +43,9 @@ function select(tab: Tab) {
     <div
       :class="[
         'flex',
-        variant === 'underline' ? 'border-b border-neutral-200 gap-0' : 'gap-1 p-1 bg-neutral-100 rounded-lg',
+        variant === 'underline'
+          ? 'border-b border-neutral-200 gap-0'
+          : 'gap-1 p-1 bg-neutral-100 rounded-lg',
       ]"
       role="tablist"
     >
@@ -56,20 +58,22 @@ function select(tab: Tab) {
         :disabled="tab.disabled"
         :class="[
           'whitespace-nowrap transition-colors font-semibold',
-          variant === 'underline' ? [
-            size === 'sm' ? 'px-3 py-2 text-caption' : 'px-4 py-3 text-body',
-            tab.id === modelValue
-              ? 'text-brand-600 border-b-2 border-brand-600 -mb-px'
-              : 'text-neutral-500 hover:text-neutral-700 hover:border-b-2 hover:border-neutral-300',
-            tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
-          ] : [
-            size === 'sm' ? 'px-3 py-1.5 text-caption' : 'px-4 py-2 text-body',
-            'rounded-md',
-            tab.id === modelValue
-              ? 'bg-white text-neutral-900 shadow-sm'
-              : 'text-neutral-500 hover:text-neutral-700',
-            tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
-          ],
+          variant === 'underline'
+            ? [
+                size === 'sm' ? 'px-3 py-2 text-caption' : 'px-4 py-3 text-body',
+                tab.id === modelValue
+                  ? 'text-brand-600 border-b-2 border-brand-600 -mb-px'
+                  : 'text-neutral-500 hover:text-neutral-700 hover:border-b-2 hover:border-neutral-300',
+                tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+              ]
+            : [
+                size === 'sm' ? 'px-3 py-1.5 text-caption' : 'px-4 py-2 text-body',
+                'rounded-md',
+                tab.id === modelValue
+                  ? 'bg-white text-neutral-900 shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-700',
+                tab.disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer',
+              ],
         ]"
         @click="select(tab)"
       >
@@ -103,3 +107,4 @@ function select(tab: Tab) {
       </template>
     </div>
   </div>
+</template>

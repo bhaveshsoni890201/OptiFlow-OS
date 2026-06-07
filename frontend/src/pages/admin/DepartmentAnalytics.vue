@@ -390,4 +390,3 @@ onMounted(loadDepartments)
     </template>
   </div>
 </template>
-

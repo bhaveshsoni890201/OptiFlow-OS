@@ -34,7 +34,9 @@ export const useStore = defineStore('root', () => {
       if (parsed.currentRole) currentRole.value = parsed.currentRole
       if (parsed.language) language.value = parsed.language
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 
   const isAuthenticated = computed(() => user.value.isAuthenticated)
   const isDoer = computed(() => currentRole.value === 'doer')
@@ -46,7 +48,9 @@ export const useStore = defineStore('root', () => {
   let savedPrefs: Record<string, boolean> = {}
   try {
     savedPrefs = JSON.parse(localStorage.getItem('optiflow-notif-prefs') ?? '{}')
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   const notificationPrefs = reactive<Record<string, boolean>>({ ...defaultPrefs, ...savedPrefs })
 
   function setNotificationPref(key: string, value: boolean) {
@@ -64,7 +68,9 @@ export const useStore = defineStore('root', () => {
     if (payload.language) language.value = payload.language
     try {
       localStorage.setItem('optiflow-auth', JSON.stringify(user.value))
-    } catch { /* localStorage unavailable */ }
+    } catch {
+      /* localStorage unavailable */
+    }
   }
 
   function clearAuth() {
@@ -74,7 +80,9 @@ export const useStore = defineStore('root', () => {
     try {
       localStorage.removeItem('optiflow-auth')
       localStorage.removeItem('auth_token')
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }
 
   function setRole(role: Role) {
@@ -143,6 +151,7 @@ export const useStore = defineStore('root', () => {
     clearAuth,
     setRole,
     setLanguage,
+    setTheme,
     toggleTheme,
     toggleSidebar,
     addToast,

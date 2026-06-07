@@ -150,7 +150,9 @@ const activityLog = computed(() => {
   if ('reminder_count' in task.value && (task.value as DelegationTask).reminder_count > 0) {
     items.push({
       icon: 'bell',
-      text: t('taskDetail.activityTypes.reminderSent', { count: (task.value as DelegationTask).reminder_count }),
+      text: t('taskDetail.activityTypes.reminderSent', {
+        count: (task.value as DelegationTask).reminder_count,
+      }),
       time: (task.value as DelegationTask).last_activity,
     })
   }
@@ -174,7 +176,9 @@ async function handleNextAction() {
   }
   store.addToast({
     type: 'success',
-    message: t('taskDetail.activityTypes.taskMoved', { status: task.value.status.replace(/_/g, ' ') }),
+    message: t('taskDetail.activityTypes.taskMoved', {
+      status: task.value.status.replace(/_/g, ' '),
+    }),
     duration: 3000,
   })
   if (completing.value) {
@@ -208,7 +212,11 @@ async function handleEscalate() {
 
 async function handleAddComment() {
   if (!commentText.value.trim()) return
-  store.addToast({ type: 'success', message: t('taskDetail.activityTypes.commentAdded'), duration: 2000 })
+  store.addToast({
+    type: 'success',
+    message: t('taskDetail.activityTypes.commentAdded'),
+    duration: 2000,
+  })
   commentText.value = ''
 }
 
@@ -232,9 +240,12 @@ async function fetchTaskDetail() {
     await taskStore.fetchTasks()
     if (timedOut.value) throw new Error('Request timed out')
     task.value = taskStore.allTasks.find((t) => t.id === taskId) || null
-    if (!task.value) store.addToast({ type: 'error', message: t('taskDetail.notFound'), duration: 3000 })
+    if (!task.value)
+      store.addToast({ type: 'error', message: t('taskDetail.notFound'), duration: 3000 })
   } catch {
-    error.value = timedOut.value ? 'Request timed out. Please try again.' : t('taskDetail.loadError')
+    error.value = timedOut.value
+      ? 'Request timed out. Please try again.'
+      : t('taskDetail.loadError')
   }
   clearLoadTimeout()
   loading.value = false
@@ -382,7 +393,9 @@ onMounted(fetchTaskDetail)
             class="flex items-center gap-2 text-body text-neutral-600"
           >
             <ClockIcon class="w-4 h-4 text-neutral-400 shrink-0" />
-            <span class="text-body-strong text-neutral-700">{{ $t('taskDetail.lastActivity') }}</span>
+            <span class="text-body-strong text-neutral-700">{{
+              $t('taskDetail.lastActivity')
+            }}</span>
             <span>{{ formatDate((task as DelegationTask).last_activity) }}</span>
           </div>
           <div
@@ -390,12 +403,16 @@ onMounted(fetchTaskDetail)
             class="flex items-center gap-2 text-body text-warning-600"
           >
             <BellAlertIcon class="w-4 h-4 shrink-0" />
-            <span class="font-semibold">{{ $t('taskDetail.reminderCount', { count: (task as DelegationTask).reminder_count }) }}</span>
+            <span class="font-semibold">{{
+              $t('taskDetail.reminderCount', { count: (task as DelegationTask).reminder_count })
+            }}</span>
           </div>
           <!-- Checklist specific -->
           <template v-if="isChecklist">
             <div class="flex items-center gap-2 text-body text-neutral-600">
-              <span class="text-body-strong text-neutral-700">{{ $t('taskDetail.frequency') }}</span>
+              <span class="text-body-strong text-neutral-700">{{
+                $t('taskDetail.frequency')
+              }}</span>
               <span>{{ (task as ChecklistItem).frequency }}</span>
             </div>
             <div
@@ -462,7 +479,11 @@ onMounted(fetchTaskDetail)
                 <p class="text-caption text-neutral-400">{{ formatDateTime(log.time) }}</p>
               </div>
             </div>
-            <OptEmptyState v-if="activityLog.length === 0" type="tasks" :title="$t('taskDetail.noActivity')" />
+            <OptEmptyState
+              v-if="activityLog.length === 0"
+              type="tasks"
+              :title="$t('taskDetail.noActivity')"
+            />
           </div>
         </div>
 
@@ -496,7 +517,8 @@ onMounted(fetchTaskDetail)
     <!-- Sticky bottom action bar -->
     <div
       v-if="task && !loading"
-      class="fixed bottom-16 lg:bottom-0 left-0 right-0 z-20 bg-white border-t border-neutral-200 px-4 py-3" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px))"
+      class="fixed bottom-16 lg:bottom-0 left-0 right-0 z-20 bg-white border-t border-neutral-200 px-4 py-3"
+      style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px))"
     >
       <div class="max-w-content mx-auto flex items-center gap-3">
         <button

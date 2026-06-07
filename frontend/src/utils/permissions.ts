@@ -13,7 +13,7 @@ export type AppFeature =
   | 'tasks.delete'
   | 'leave.approve'
   | 'leave.reject'
-  | 'leave.escort'
+  | 'leave.escalate'
   | 'attendance.correct'
   | 'attendance.view-all'
   | 'tickets.assign'
@@ -40,7 +40,7 @@ const featurePermissions: Record<AppFeature, UserRole[]> = {
   'tasks.delete': ['admin'],
   'leave.approve': ['captain', 'admin'],
   'leave.reject': ['captain', 'admin'],
-  'leave.escort': ['admin'],
+  'leave.escalate': ['admin'],
   'attendance.correct': ['captain', 'admin'],
   'attendance.view-all': ['captain', 'admin'],
   'tickets.assign': ['captain', 'admin'],

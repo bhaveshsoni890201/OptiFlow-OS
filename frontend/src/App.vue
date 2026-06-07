@@ -18,13 +18,21 @@ router.afterEach(() => {
   isRouteLoading.value = false
 })
 
-watch(() => store.language, (lang) => {
-  locale.value = lang
-}, { immediate: true })
+watch(
+  () => store.language,
+  (lang) => {
+    locale.value = lang
+  },
+  { immediate: true },
+)
 
 onMounted(() => {
   try {
-    const saved = localStorage.getItem('optiflow-theme') as 'light' | 'dark' | 'high-contrast' | null
+    const saved = localStorage.getItem('optiflow-theme') as
+      | 'light'
+      | 'dark'
+      | 'high-contrast'
+      | null
     if (saved) store.setTheme(saved)
   } catch {
     // localStorage unavailable (incognito, storage blocked)
@@ -33,17 +41,19 @@ onMounted(() => {
   if (!store.isAuthenticated) {
     const token = localStorage.getItem('auth_token')
     if (token) {
-      getProfile().then((result) => {
-        if (result) {
-          store.setUser({
-            isAuthenticated: true,
-            currentRole: result.role,
-            employee: result.employee,
-          })
-        }
-      }).catch(() => {
-        localStorage.removeItem('auth_token')
-      })
+      getProfile()
+        .then((result) => {
+          if (result) {
+            store.setUser({
+              isAuthenticated: true,
+              currentRole: result.role,
+              employee: result.employee,
+            })
+          }
+        })
+        .catch(() => {
+          localStorage.removeItem('auth_token')
+        })
     }
   }
 })

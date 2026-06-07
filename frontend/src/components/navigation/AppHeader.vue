@@ -123,11 +123,7 @@ function handleAvatarKeydown(e: KeyboardEvent) {
     <div class="hidden md:flex items-center h-16 px-4 lg:px-6 gap-4">
       <!-- Logo -->
       <router-link :to="`/${panelName}`" class="flex items-center gap-2 shrink-0 whitespace-nowrap">
-        <img
-          :src="brandLogo"
-          alt="OptiFlow OS Logo"
-          class="h-8 w-auto"
-        />
+        <img :src="brandLogo" alt="OptiFlow OS Logo" class="h-8 w-auto" />
       </router-link>
 
       <!-- Back button (conditional) -->

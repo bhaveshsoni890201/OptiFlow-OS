@@ -56,6 +56,7 @@ export interface DelegationTask {
   last_activity: string
   reminder_count: number
   attachments?: Attachment[]
+  category?: string
   created_on: string
   type: 'delegation'
 }
@@ -298,6 +299,10 @@ export interface Department {
   id: string
   name: string
   head: string
+  headId?: string
+  description?: string
+  parent?: string
+  status?: 'active' | 'disabled'
   employeeCount: number
 }
 

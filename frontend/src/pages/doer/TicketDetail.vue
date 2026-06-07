@@ -66,7 +66,9 @@ async function fetchTicket() {
       ticket.value = result
     }
   } catch {
-    error.value = timedOut.value ? 'Request timed out. Please try again.' : t('ticketDetail.loadError')
+    error.value = timedOut.value
+      ? 'Request timed out. Please try again.'
+      : t('ticketDetail.loadError')
   }
   clearLoadTimeout()
   loading.value = false
@@ -99,6 +101,12 @@ function addComment() {
 function formatDate(d: string) {
   return formatDateTime(d)
 }
+
+function handleReopen() {
+  if (!ticket.value) return
+  ticketStore.reopenTicket(ticket.value.id)
+  fetchTicket()
+}
 </script>
 
 <template>
@@ -113,7 +121,9 @@ function formatDate(d: string) {
       >
         <ArrowLeftIcon class="w-5 h-5" />
       </button>
-      <h1 class="text-h3 text-neutral-900 truncate flex-1">{{ loading ? '...' : ticket?.subject }}</h1>
+      <h1 class="text-h3 text-neutral-900 truncate flex-1">
+        {{ loading ? '...' : ticket?.subject }}
+      </h1>
     </div>
 
     <template v-if="loading">
@@ -186,7 +196,9 @@ function formatDate(d: string) {
                 </div>
                 <span
                   class="text-overline"
-                  :class="i <= currentStepIndex ? 'text-neutral-700 font-semibold' : 'text-neutral-400'"
+                  :class="
+                    i <= currentStepIndex ? 'text-neutral-700 font-semibold' : 'text-neutral-400'
+                  "
                 >
                   {{ $t('ticketDetail.statusDisplay.' + statusDisplayKey[step]) }}
                 </span>
@@ -194,7 +206,13 @@ function formatDate(d: string) {
               <div
                 v-if="i < statusSteps.length - 1"
                 class="flex-1 h-0.5 rounded-full"
-                :class="i < currentStepIndex ? 'bg-success-600' : i === currentStepIndex ? 'bg-brand-600' : 'bg-neutral-200'"
+                :class="
+                  i < currentStepIndex
+                    ? 'bg-success-600'
+                    : i === currentStepIndex
+                      ? 'bg-brand-600'
+                      : 'bg-neutral-200'
+                "
               ></div>
             </template>
           </div>
@@ -211,17 +229,31 @@ function formatDate(d: string) {
               <div
                 class="w-8 h-8 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center text-caption font-bold flex-shrink-0"
               >
-                {{ (comment.author.split(' ').map((w: string) => w[0]).join('').slice(0, 2) || comment.author[0]).toUpperCase() }}
+                {{
+                  (
+                    comment.author
+                      .split(' ')
+                      .map((w: string) => w[0])
+                      .join('')
+                      .slice(0, 2) || comment.author[0]
+                  ).toUpperCase()
+                }}
               </div>
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
                   <span class="text-body-strong text-neutral-900">{{ comment.author }}</span>
-                  <span class="text-caption text-neutral-400">{{ formatDate(comment.created_on) }}</span>
+                  <span class="text-caption text-neutral-400">{{
+                    formatDate(comment.created_on)
+                  }}</span>
                 </div>
                 <p class="text-body text-neutral-700">{{ comment.text }}</p>
               </div>
             </div>
-            <OptEmptyState v-if="ticket.comments.length === 0" type="comments" :title="$t('ticketDetail.noComments')" />
+            <OptEmptyState
+              v-if="ticket.comments.length === 0"
+              type="comments"
+              :title="$t('ticketDetail.noComments')"
+            />
           </div>
 
           <div class="flex gap-2">
@@ -259,19 +291,24 @@ function formatDate(d: string) {
 
         <!-- Reopen (within 7 days) -->
         <div
-          v-if="ticket.status === 'closed' && (Date.now() - new Date(ticket.updated_on).getTime()) < 7 * 24 * 60 * 60 * 1000"
+          v-if="
+            ticket.status === 'closed' &&
+            Date.now() - new Date(ticket.updated_on).getTime() < 7 * 24 * 60 * 60 * 1000
+          "
           class="card p-4 border border-amber-200 bg-amber-50"
         >
           <div class="flex items-center justify-between">
             <div>
-              <h3 class="text-h3 text-amber-700">{{ $t('ticketDetail.reopenTitle') || 'Reopen Ticket' }}</h3>
+              <h3 class="text-h3 text-amber-700">
+                {{ $t('ticketDetail.reopenTitle') || 'Reopen Ticket' }}
+              </h3>
               <p class="text-caption text-amber-600 mt-0.5">
                 Closed {{ formatRelativeTime(ticket.updated_on) }}. You can reopen within 7 days.
               </p>
             </div>
             <button
               class="px-4 py-2 rounded-lg bg-amber-600 text-white text-button font-medium hover:bg-amber-700 transition-colors"
-              @click="ticketStore.reopenTicket(ticket.id); fetchTicket()"
+              @click="handleReopen"
             >
               {{ $t('ticketDetail.reopen') || 'Reopen' }}
             </button>
@@ -280,17 +317,23 @@ function formatDate(d: string) {
 
         <!-- Satisfaction Survey -->
         <div
-          v-if="(ticket.status === 'resolved' || ticket.status === 'closed') && !ticket.satisfaction_score"
+          v-if="
+            (ticket.status === 'resolved' || ticket.status === 'closed') &&
+            !ticket.satisfaction_score
+          "
           class="card p-4 border border-brand-200 bg-brand-50"
         >
           <h3 class="text-h3 text-brand-700 mb-2">Rate your experience</h3>
           <div class="flex items-center gap-2">
             <button
-              v-for="score in 5" :key="score"
+              v-for="score in 5"
+              :key="score"
               class="w-10 h-10 rounded-full text-sm font-bold transition-colors"
-              :class="ticket.satisfaction_score && ticket.satisfaction_score >= score
-                ? 'bg-brand-600 text-white'
-                : 'bg-white text-brand-600 border border-brand-200 hover:bg-brand-100'"
+              :class="
+                ticket.satisfaction_score && ticket.satisfaction_score >= score
+                  ? 'bg-brand-600 text-white'
+                  : 'bg-white text-brand-600 border border-brand-200 hover:bg-brand-100'
+              "
               @click="ticketStore.submitSatisfaction(ticket.id, score)"
             >
               {{ score }}

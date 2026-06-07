@@ -96,7 +96,10 @@ loadComponent('permissions')
 
     <!-- Tab Content -->
     <div class="min-h-[50vh]">
-      <div v-if="tabErrors[activeTab]" class="flex flex-col items-center justify-center py-20 text-center">
+      <div
+        v-if="tabErrors[activeTab]"
+        class="flex flex-col items-center justify-center py-20 text-center"
+      >
         <ExclamationTriangleIcon class="h-10 w-10 text-danger-400 mb-3" />
         <p class="text-body-strong text-neutral-900 mb-1">{{ tabErrors[activeTab] }}</p>
         <button
@@ -107,8 +110,8 @@ loadComponent('permissions')
         </button>
       </div>
       <component
-        v-else-if="tabsWithComponents[activeTab]"
         :is="tabsWithComponents[activeTab]"
+        v-else-if="tabsWithComponents[activeTab]"
         :key="activeTab"
       />
       <div v-else class="flex items-center justify-center py-20">

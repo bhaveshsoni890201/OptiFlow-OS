@@ -29,4 +29,5 @@ const worklistService = new WorklistService()
 
 export const getWorklists = () => worklistService.getWorklists()
 export const createWorklist = (data: Partial<Worklist>) => worklistService.createWorklist(data)
-export const updateWorklist = (id: string, data: Partial<Worklist>) => worklistService.updateWorklist(id, data)
+export const updateWorklist = (id: string, data: Partial<Worklist>) =>
+  worklistService.updateWorklist(id, data)

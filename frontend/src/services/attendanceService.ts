@@ -28,7 +28,9 @@ class AttendanceService extends BaseService {
   }
 
   async checkInSvc(workMode: string): Promise<void> {
-    await this.mutate('post', endpoints.attendance.checkIn, { work_mode: workMode }, ['attendance:'])
+    await this.mutate('post', endpoints.attendance.checkIn, { work_mode: workMode }, [
+      'attendance:',
+    ])
   }
 
   async checkOutSvc(): Promise<void> {
@@ -51,5 +53,6 @@ export const getAttendanceLogs = () => attendanceService.getAttendanceLogs()
 export const getAttendanceCorrections = () => attendanceService.getAttendanceCorrections()
 export const checkInSvc = (workMode: string) => attendanceService.checkInSvc(workMode)
 export const checkOutSvc = () => attendanceService.checkOutSvc()
-export const submitAttendanceCorrection = (data: Parameters<AttendanceService['submitAttendanceCorrection']>[0]) =>
-  attendanceService.submitAttendanceCorrection(data)
+export const submitAttendanceCorrection = (
+  data: Parameters<AttendanceService['submitAttendanceCorrection']>[0],
+) => attendanceService.submitAttendanceCorrection(data)

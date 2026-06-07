@@ -37,5 +37,7 @@ class DepartmentService extends BaseService {
 const departmentService = new DepartmentService()
 
 export const getDepartments = () => departmentService.getDepartments()
-export const createDepartment = (data: Partial<Department>) => departmentService.createDepartment(data)
-export const updateDepartment = (id: string, data: Partial<Department>) => departmentService.updateDepartment(id, data)
+export const createDepartment = (data: Partial<Department>) =>
+  departmentService.createDepartment(data)
+export const updateDepartment = (id: string, data: Partial<Department>) =>
+  departmentService.updateDepartment(id, data)

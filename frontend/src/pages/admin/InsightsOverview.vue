@@ -36,27 +36,52 @@ const kpis = computed(() => {
   const rate = total > 0 ? ((done / total) * 100).toFixed(1) : '0'
 
   const onTimeTasks = taskStore.allTasks.filter(
-    (t) => t.status === 'completed' && 'due_date' in t && t.due_date && new Date(t.due_date) >= new Date(new Date().setDate(new Date().getDate() - 7)),
+    (t) =>
+      t.status === 'completed' &&
+      'due_date' in t &&
+      t.due_date &&
+      new Date(t.due_date) >= new Date(new Date().setDate(new Date().getDate() - 7)),
   )
   const overdueCompleted = taskStore.allTasks.filter(
-    (t) => t.status === 'completed' && 'due_date' in t && t.due_date && new Date(t.due_date) < new Date(),
+    (t) =>
+      t.status === 'completed' &&
+      'due_date' in t &&
+      t.due_date &&
+      new Date(t.due_date) < new Date(),
   )
-  const onTimeRate = overdueCompleted.length > 0
-    ? ((onTimeTasks.length / (onTimeTasks.length + overdueCompleted.length)) * 100).toFixed(1)
-    : (rate)
+  const onTimeRate =
+    overdueCompleted.length > 0
+      ? ((onTimeTasks.length / (onTimeTasks.length + overdueCompleted.length)) * 100).toFixed(1)
+      : rate
 
   const delays = rescueStore.records.filter((r) => r.delay_days > 0)
-  const avgDelayHrs = delays.length > 0
-    ? (delays.reduce((s, r) => s + r.delay_days * 8, 0) / delays.length).toFixed(1)
-    : '0'
+  const avgDelayHrs =
+    delays.length > 0
+      ? (delays.reduce((s, r) => s + r.delay_days * 8, 0) / delays.length).toFixed(1)
+      : '0'
 
   const prevRescues = rescueStore.records.length
   const rescueChange = prevRescues > 0 ? `-${Math.min(prevRescues, 3)}` : '0'
 
   return [
-    { label: 'Avg Completion Rate', value: `${rate}%`, change: rate !== '0' ? `+${rate}pp` : '0%', up: true },
-    { label: 'Avg On-Time Rate', value: `${onTimeRate}%`, change: `${onTimeRate}%`, up: +onTimeRate >= 75 },
-    { label: 'Total Rescues', value: `${rescueStore.records.length}`, change: rescueChange, up: true },
+    {
+      label: 'Avg Completion Rate',
+      value: `${rate}%`,
+      change: rate !== '0' ? `+${rate}pp` : '0%',
+      up: true,
+    },
+    {
+      label: 'Avg On-Time Rate',
+      value: `${onTimeRate}%`,
+      change: `${onTimeRate}%`,
+      up: +onTimeRate >= 75,
+    },
+    {
+      label: 'Total Rescues',
+      value: `${rescueStore.records.length}`,
+      change: rescueChange,
+      up: true,
+    },
     { label: 'Avg Delay (hrs)', value: avgDelayHrs, change: avgDelayHrs, up: false },
   ]
 })
@@ -76,15 +101,23 @@ const trends = computed(() => {
     const start = i * 7
     const end = (i + 1) * 7
     const weekTasks = taskStore.allTasks.filter((t) => {
-      const d = new Date(t.due_date || t.created_on)
+      const d = new Date(t.due_date || new Date().toISOString())
       return d.getDate() > start && d.getDate() <= end
     })
     const done = weekTasks.filter((t) => t.status === 'completed').length
     return weekTasks.length > 0 ? +((done / weekTasks.length) * 100).toFixed(1) : 0
   })
   return [
-    { label: 'Task Volume', values: weeklyRescues.length > 0 ? weeklyRescues : [0, 0, 0, 0, 0, 0], color: 'bg-blue-500' },
-    { label: 'Completion %', values: weeklyCompletion.some((v) => v > 0) ? weeklyCompletion : [0, 0, 0, 0, 0, 0], color: 'bg-green-500' },
+    {
+      label: 'Task Volume',
+      values: weeklyRescues.length > 0 ? weeklyRescues : [0, 0, 0, 0, 0, 0],
+      color: 'bg-blue-500',
+    },
+    {
+      label: 'Completion %',
+      values: weeklyCompletion.some((v) => v > 0) ? weeklyCompletion : [0, 0, 0, 0, 0, 0],
+      color: 'bg-green-500',
+    },
   ]
 })
 
@@ -103,7 +136,10 @@ const topDelayDepts = computed(() => {
     .map(([name, data]) => ({
       name,
       delayRate: data.count > 0 ? +(data.total / data.count).toFixed(1) : 0,
-      trend: data.count > 1 ? `${data.total > data.count ? '+' : '-'}${(data.total / data.count).toFixed(1)}%` : '0%',
+      trend:
+        data.count > 1
+          ? `${data.total > data.count ? '+' : '-'}${(data.total / data.count).toFixed(1)}%`
+          : '0%',
     }))
     .sort((a, b) => b.delayRate - a.delayRate)
     .slice(0, 4)
@@ -420,4 +456,3 @@ function handleExport(format: 'pdf' | 'csv') {
     </template>
   </div>
 </template>
-

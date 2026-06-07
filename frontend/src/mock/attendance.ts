@@ -17,8 +17,34 @@ const employees = [
   { id: 'EMP-0008', name: 'Meena Devi' },
 ]
 
-const checkInTimes = ['07:00', '07:05', '07:10', '07:15', '07:30', '08:30', '08:45', '08:55', '09:00', '09:15']
-const checkOutTimes = ['15:00', '15:15', '15:25', '15:30', '15:45', '16:30', '16:45', '17:00', '17:15', '17:30', '17:45', '18:00', '18:15', '18:30']
+const checkInTimes = [
+  '07:00',
+  '07:05',
+  '07:10',
+  '07:15',
+  '07:30',
+  '08:30',
+  '08:45',
+  '08:55',
+  '09:00',
+  '09:15',
+]
+const checkOutTimes = [
+  '15:00',
+  '15:15',
+  '15:25',
+  '15:30',
+  '15:45',
+  '16:30',
+  '16:45',
+  '17:00',
+  '17:15',
+  '17:30',
+  '17:45',
+  '18:00',
+  '18:15',
+  '18:30',
+]
 
 export const attendanceLogs: AttendanceLog[] = (() => {
   const logs: AttendanceLog[] = []
@@ -48,7 +74,8 @@ export const attendanceLogs: AttendanceLog[] = (() => {
         })
       } else {
         const isWfh = offset % 10 === 0
-        const ci = isWfh && emp.id === 'EMP-0003' ? '08:55' : checkInTimes[idCounter % checkInTimes.length]
+        const ci =
+          isWfh && emp.id === 'EMP-0003' ? '08:55' : checkInTimes[idCounter % checkInTimes.length]
         const co = checkOutTimes[idCounter % checkOutTimes.length]
         const isLate = idCounter % 7 === 0
         logs.push({
@@ -77,7 +104,8 @@ export const attendanceCorrections: AttendanceCorrection[] = [
     original_check_out: '17:30',
     requested_check_in: '09:00',
     requested_check_out: '18:00',
-    reason: 'Punched in late because biometric machine was not working. Was on the floor since 8:50 AM.',
+    reason:
+      'Punched in late because biometric machine was not working. Was on the floor since 8:50 AM.',
     status: 'pending',
   },
   {
@@ -86,7 +114,8 @@ export const attendanceCorrections: AttendanceCorrection[] = [
     original_record_id: 'ATT-0002',
     original_check_in: '09:15',
     requested_check_in: '08:55',
-    reason: 'Was in the factory since 8:30 AM but had a visitor meeting at the gate. Forgot to punch in immediately.',
+    reason:
+      'Was in the factory since 8:30 AM but had a visitor meeting at the gate. Forgot to punch in immediately.',
     status: 'pending',
   },
   {

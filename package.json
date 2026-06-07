@@ -1,0 +1,19 @@
+{
+  "name": "optiflow-os",
+  "private": true,
+  "version": "0.8.0",
+  "type": "module",
+  "description": "OptiFlow OS — Operating System for Indian MSMEs",
+  "scripts": {
+    "dev": "npm run dev --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "preview": "npm run preview --prefix frontend",
+    "lint": "npm run lint --prefix frontend",
+    "test": "npm run test --prefix frontend",
+    "test:coverage": "npm run test:coverage --prefix frontend",
+    "install:frontend": "npm install --prefix frontend"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

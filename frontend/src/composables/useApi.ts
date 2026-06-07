@@ -16,7 +16,11 @@ interface UseApiReturn<T> {
   reset: () => void
 }
 
-export function useApi<T>(method: HttpMethod, url: string, options?: UseApiOptions): UseApiReturn<T> {
+export function useApi<T>(
+  method: HttpMethod,
+  url: string,
+  options?: UseApiOptions,
+): UseApiReturn<T> {
   const data = ref<T | null>(null) as Ref<T | null>
   const loading = ref(false)
   const error = ref<string | null>(null)
@@ -46,16 +50,16 @@ export function useApi<T>(method: HttpMethod, url: string, options?: UseApiOptio
           result = await apiGet<T>(url, buildConfig(args[0]))
           break
         case 'post':
-          result = await apiPost<T>(url, args[0] as any, buildConfig())
+          result = await apiPost<T>(url, args[0] as any, buildConfig(args[1]))
           break
         case 'put':
-          result = await apiPut<T>(url, args[0] as any, buildConfig())
+          result = await apiPut<T>(url, args[0] as any, buildConfig(args[1]))
           break
         case 'patch':
-          result = await apiPatch<T>(url, args[0] as any, buildConfig())
+          result = await apiPatch<T>(url, args[0] as any, buildConfig(args[1]))
           break
         case 'delete':
-          result = await apiDelete<T>(url, buildConfig())
+          result = await apiDelete<T>(url, buildConfig(args[0]))
           break
       }
       data.value = result!

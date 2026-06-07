@@ -1,7 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { Employee } from '../types'
-import { getEmployees, createEmployee as createEmployeeSvc, updateEmployee as updateEmployeeSvc, deleteEmployee as deleteEmployeeSvc } from '../services'
+import {
+  getEmployees,
+  createEmployee as createEmployeeSvc,
+  updateEmployee as updateEmployeeSvc,
+  deleteEmployee as deleteEmployeeSvc,
+} from '../services'
 import { cache } from '../services/BaseService'
 import { logger } from '../utils/logger'
 
@@ -72,4 +77,3 @@ export const useAdminStore = defineStore('admin', () => {
     deleteEmployee,
   }
 })
-

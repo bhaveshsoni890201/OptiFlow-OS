@@ -179,10 +179,7 @@ onMounted(loadDetail)
       <div class="text-center">
         <ExclamationTriangleIcon class="w-12 h-12 text-red-400 mx-auto mb-3" />
         <p class="text-sm text-red-600 font-medium">{{ error }}</p>
-        <button
-          class="mt-3 text-sm text-blue-600 hover:underline"
-          @click="loadDetail()"
-        >
+        <button class="mt-3 text-sm text-blue-600 hover:underline" @click="loadDetail()">
           Retry
         </button>
       </div>
@@ -246,7 +243,13 @@ onMounted(loadDetail)
                   {{ i === 1 ? 'Today — Overdue' : `Day ${i - 1} — No update` }}
                 </p>
                 <p class="text-xs text-slate-400">
-                  {{ new Date(Date.now() - (i - 1) * 86400000).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) }}
+                  {{
+                    new Date(Date.now() - (i - 1) * 86400000).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                    })
+                  }}
                 </p>
               </div>
             </div>

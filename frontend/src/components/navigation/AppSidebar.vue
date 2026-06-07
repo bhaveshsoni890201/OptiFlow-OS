@@ -108,9 +108,7 @@ const panelNavGroups: Record<string, NavGroup[]> = {
     },
     {
       label: 'Learning',
-      items: [
-        { label: 'Training', icon: AcademicCapIcon, to: '/doer/training' },
-      ],
+      items: [{ label: 'Training', icon: AcademicCapIcon, to: '/doer/training' }],
     },
     {
       label: 'Support',
@@ -140,9 +138,7 @@ const panelNavGroups: Record<string, NavGroup[]> = {
     },
     {
       label: 'Learning',
-      items: [
-        { label: 'Training & SOPs', icon: AcademicCapIcon, to: '/captain/training' },
-      ],
+      items: [{ label: 'Training & SOPs', icon: AcademicCapIcon, to: '/captain/training' }],
     },
     {
       label: 'Support',
@@ -187,7 +183,12 @@ const currentEmployee = computed(() => store.user.employee)
 
 const initials = computed(() => {
   const name = currentEmployee.value?.name || 'U'
-  return name.split(' ').map((s: string) => s[0]).join('').slice(0, 2).toUpperCase()
+  return name
+    .split(' ')
+    .map((s: string) => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
 })
 
 const statusDot = computed(() => 'bg-success-500')
@@ -231,18 +232,8 @@ const transitionClass = 'transition-all duration-200 ease-in-out'
       class="flex items-center gap-2 px-4 py-3 border-b border-neutral-200 shrink-0"
       :class="collapsed ? 'justify-center px-2' : ''"
     >
-      <img
-        v-if="!collapsed"
-        :src="brandLogo"
-        alt="OptiFlow OS Logo"
-        class="h-8 w-auto"
-      />
-      <img
-        v-else
-        :src="brandLogoMark"
-        alt="OptiFlow OS Logo"
-        class="h-7 w-7"
-      />
+      <img v-if="!collapsed" :src="brandLogo" alt="OptiFlow OS Logo" class="h-8 w-auto" />
+      <img v-else :src="brandLogoMark" alt="OptiFlow OS Logo" class="h-7 w-7" />
     </router-link>
 
     <!-- Profile section -->
@@ -276,7 +267,9 @@ const transitionClass = 'transition-all duration-200 ease-in-out'
     <nav class="flex-1 overflow-y-auto py-2">
       <template v-for="group in navGroups" :key="group.label">
         <div v-if="!collapsed" class="px-4 pt-3 pb-1">
-          <span class="text-caption font-semibold text-neutral-400 uppercase tracking-wider">{{ group.label }}</span>
+          <span class="text-caption font-semibold text-neutral-400 uppercase tracking-wider">{{
+            group.label
+          }}</span>
         </div>
         <ul class="space-y-0.5 px-2">
           <li v-for="item in group.items" :key="item.to">
@@ -309,7 +302,8 @@ const transitionClass = 'transition-all duration-200 ease-in-out'
                     ? 'text-primary-600 font-medium'
                     : 'text-neutral-600 group-hover:text-neutral-800'
                 "
-              >{{ item.label }}</span>
+                >{{ item.label }}</span
+              >
               <span
                 v-if="isActive(item) && !collapsed"
                 class="absolute inset-y-1 right-0 w-0.5 rounded-l-full"

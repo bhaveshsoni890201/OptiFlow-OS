@@ -32,7 +32,11 @@ const captains = computed(() =>
   employees.value.filter((e) => e.roles.includes('captain') || e.roles.includes('admin')),
 )
 
-const { immediate: searchInput, debounced: searchQuery, clear: clearSearch } = useDebouncedSearch(300)
+const {
+  immediate: searchInput,
+  debounced: searchQuery,
+  clear: clearSearch,
+} = useDebouncedSearch(300)
 const filterDepartment = ref('')
 const filterRole = ref('')
 const filterStatus = ref('')
@@ -66,7 +70,7 @@ const form = ref({
   designation: '',
   reporting_captain: '',
   roles: [] as Role[],
-  status: 'active' as 'active' | 'disabled',
+  status: 'active' as 'active' | 'disabled' | 'offboarded',
 })
 
 const formErrors = ref<Record<string, string>>({})
@@ -267,12 +271,16 @@ const filterModel = ref<Record<string, any>>({
   status: '',
 })
 
-watch(filterModel, (val) => {
-  searchInput.value = val.search || ''
-  filterDepartment.value = val.department || ''
-  filterRole.value = val.role || ''
-  filterStatus.value = val.status || ''
-}, { deep: true })
+watch(
+  filterModel,
+  (val) => {
+    searchInput.value = val.search || ''
+    filterDepartment.value = val.department || ''
+    filterRole.value = val.role || ''
+    filterStatus.value = val.status || ''
+  },
+  { deep: true },
+)
 
 function clearFilters() {
   clearSearch()
@@ -313,18 +321,14 @@ const roleColors: Record<Role, string> = {
     </div>
 
     <!-- Search & Filters -->
-    <OptFilterBar
-      :filters="filterConfig"
-      v-model="filterModel"
-      @reset="clearFilters"
-    />
+    <OptFilterBar v-model="filterModel" :filters="filterConfig" @reset="clearFilters" />
 
     <!-- Table -->
     <OptTable
       :columns="tableColumns"
       :rows="paginatedEmployees"
       :loading="loading"
-      :error="loadError"
+      :error="loadError ?? undefined"
       empty-message="No employees yet — add your first"
       :paginated="true"
       :page-size="15"
@@ -369,9 +373,9 @@ const roleColors: Record<Role, string> = {
             v-for="role in row.roles"
             :key="role"
             class="inline-flex px-2 py-0.5 rounded-full text-xs font-medium"
-            :class="roleColors[role]"
+            :class="roleColors[role as Role]"
           >
-            {{ roleLabels[role] }}
+            {{ roleLabels[role as Role] }}
           </span>
         </div>
       </template>
@@ -462,9 +466,7 @@ const roleColors: Record<Role, string> = {
               type="tel"
               maxlength="15"
               class="w-full h-10 px-3 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              :class="
-                formErrors.mobile ? 'border-red-400 focus:ring-red-500' : 'border-slate-300'
-              "
+              :class="formErrors.mobile ? 'border-red-400 focus:ring-red-500' : 'border-slate-300'"
             />
             <p v-if="formErrors.mobile" class="text-xs text-red-500 mt-1">
               {{ formErrors.mobile }}

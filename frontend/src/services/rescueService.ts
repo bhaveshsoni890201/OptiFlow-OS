@@ -35,7 +35,9 @@ class RescueService extends BaseService {
   }
 
   async reassignRescue(id: string, newEmployeeId: string): Promise<void> {
-    await this.mutate('post', endpoints.rescue.reassign(id), { employee_id: newEmployeeId }, ['rescue:'])
+    await this.mutate('post', endpoints.rescue.reassign(id), { employee_id: newEmployeeId }, [
+      'rescue:',
+    ])
   }
 
   async escalateRescue(id: string): Promise<void> {
@@ -52,6 +54,7 @@ const rescueService = new RescueService()
 export const getRescueRecords = () => rescueService.getRescueRecords()
 export const getRescueDetail = (id: string) => rescueService.getRescueDetail(id)
 export const sendReminder = (id: string) => rescueService.sendReminder(id)
-export const reassignRescue = (id: string, newEmployeeId: string) => rescueService.reassignRescue(id, newEmployeeId)
+export const reassignRescue = (id: string, newEmployeeId: string) =>
+  rescueService.reassignRescue(id, newEmployeeId)
 export const escalateRescue = (id: string) => rescueService.escalateRescue(id)
 export const resolveRescue = (id: string) => rescueService.resolveRescue(id)

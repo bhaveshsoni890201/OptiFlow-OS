@@ -134,12 +134,11 @@ function handleCancel() {
 <template>
   <div class="min-h-screen bg-neutral-50">
     <!-- Saving overlay -->
-    <div
-      v-if="saving"
-      class="fixed inset-0 z-30 bg-white/80 flex items-center justify-center"
-    >
+    <div v-if="saving" class="fixed inset-0 z-30 bg-white/80 flex items-center justify-center">
       <div class="flex flex-col items-center gap-3">
-        <div class="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+        <div
+          class="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"
+        />
         <p class="text-body text-neutral-500">{{ $t('createTask.saving') || 'Saving...' }}</p>
       </div>
     </div>
@@ -224,12 +223,12 @@ function handleCancel() {
           >{{ $t('createTask.dueDate') }} <span class="text-danger-500">*</span></label
         >
         <input
+          :id="'input-dueDate'"
           type="date"
           :min="todayStr"
           :value="formDueDate"
           aria-label="Due date"
-          :id="'input-dueDate'"
-          :aria-describedby="(errors.dueDate && touched.dueDate) ? 'error-dueDate' : undefined"
+          :aria-describedby="errors.dueDate && touched.dueDate ? 'error-dueDate' : undefined"
           class="w-full h-12 text-body bg-white border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600"
           :class="errors.dueDate && touched.dueDate ? 'border-danger-500' : 'border-neutral-300'"
           @input="onDueDateInput(($event.target as HTMLInputElement).value)"
@@ -248,18 +247,22 @@ function handleCancel() {
       <div class="flex flex-col gap-1">
         <label class="text-body-strong text-neutral-700">{{ $t('createTask.nextFollowUp') }}</label>
         <input
+          :id="'input-followUp'"
           type="date"
           :min="todayStr"
           :max="weekEndStr"
           :value="formFollowUp"
           aria-label="Next follow-up"
-          :id="'input-followUp'"
           :aria-describedby="errors.followUp ? 'error-followUp' : undefined"
           class="w-full h-12 text-body bg-white border rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600"
           :class="errors.followUp ? 'border-danger-500' : 'border-neutral-300'"
           @input="onFollowUpInput(($event.target as HTMLInputElement).value)"
         />
-        <p v-if="errors.followUp" :id="'error-followUp'" class="text-caption text-danger-600 flex items-center gap-1">
+        <p
+          v-if="errors.followUp"
+          :id="'error-followUp'"
+          class="text-caption text-danger-600 flex items-center gap-1"
+        >
           <ExclamationTriangleIcon class="w-3 h-3" />
           {{ errors.followUp }}
         </p>
@@ -323,7 +326,8 @@ function handleCancel() {
 
     <!-- Bottom action bar -->
     <div
-      class="fixed bottom-16 lg:bottom-0 left-0 right-0 z-20 bg-white border-t border-neutral-200 px-4 py-3" style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px))"
+      class="fixed bottom-16 lg:bottom-0 left-0 right-0 z-20 bg-white border-t border-neutral-200 px-4 py-3"
+      style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px))"
     >
       <div class="max-w-lg mx-auto flex items-center gap-3">
         <button

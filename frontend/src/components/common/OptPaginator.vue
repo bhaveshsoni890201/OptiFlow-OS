@@ -88,9 +88,7 @@ function goTo(page: number) {
       type="button"
       :class="[
         'inline-flex items-center justify-center w-8 h-8 rounded-md text-caption font-semibold transition-colors',
-        page === currentPage
-          ? 'bg-brand-600 text-white'
-          : 'text-neutral-600 hover:bg-neutral-100',
+        page === currentPage ? 'bg-brand-600 text-white' : 'text-neutral-600 hover:bg-neutral-100',
       ]"
       :aria-label="'Page ' + page"
       :aria-current="page === currentPage ? 'page' : undefined"

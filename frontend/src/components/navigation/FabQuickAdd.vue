@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
-import { PlusIcon, DocumentTextIcon, CalendarDaysIcon, LifebuoyIcon } from '@heroicons/vue/24/outline'
+import {
+  PlusIcon,
+  DocumentTextIcon,
+  CalendarDaysIcon,
+  LifebuoyIcon,
+} from '@heroicons/vue/24/outline'
 import { CheckCircleIcon } from '@heroicons/vue/24/solid'
 
 const router = useRouter()
@@ -151,7 +156,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="md:hidden" :class="{ 'invisible opacity-0': !showFab }" style="transition: opacity 0.2s ease">
+  <div
+    class="md:hidden"
+    :class="{ 'invisible opacity-0': !showFab }"
+    style="transition: opacity 0.2s ease"
+  >
     <button
       ref="triggerRef"
       type="button"
@@ -161,7 +170,10 @@ onUnmounted(() => {
       :aria-expanded="isOpen"
       @click="openSheet"
     >
-      <PlusIcon class="w-7 h-7 transition-transform duration-200" :class="{ 'rotate-45': isOpen }" />
+      <PlusIcon
+        class="w-7 h-7 transition-transform duration-200"
+        :class="{ 'rotate-45': isOpen }"
+      />
     </button>
 
     <Teleport to="body">

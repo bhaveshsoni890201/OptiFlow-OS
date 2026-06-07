@@ -48,22 +48,32 @@ const executiveSummary = computed(() => {
   const completionRate = total > 0 ? `${((done / total) * 100).toFixed(1)}%` : '0%'
 
   const overdueCompleted = taskStore.allTasks.filter(
-    (t) => t.status === 'completed' && 'due_date' in t && t.due_date && new Date(t.due_date) < new Date(),
+    (t) =>
+      t.status === 'completed' &&
+      'due_date' in t &&
+      t.due_date &&
+      new Date(t.due_date) < new Date(),
   )
   const onTimeCompleted = taskStore.allTasks.filter(
-    (t) => t.status === 'completed' && 'due_date' in t && t.due_date && new Date(t.due_date) >= new Date(),
+    (t) =>
+      t.status === 'completed' &&
+      'due_date' in t &&
+      t.due_date &&
+      new Date(t.due_date) >= new Date(),
   )
-  const onTimeRate = (onTimeCompleted.length + overdueCompleted.length) > 0
-    ? `${((onTimeCompleted.length / (onTimeCompleted.length + overdueCompleted.length)) * 100).toFixed(1)}%`
-    : `${completionRate}`
+  const onTimeRate =
+    onTimeCompleted.length + overdueCompleted.length > 0
+      ? `${((onTimeCompleted.length / (onTimeCompleted.length + overdueCompleted.length)) * 100).toFixed(1)}%`
+      : `${completionRate}`
 
   const delays = rescueStore.records.filter((r) => r.delay_days > 0)
-  const avgDelayDays = delays.length > 0
-    ? (delays.reduce((s, r) => s + r.delay_days, 0) / delays.length).toFixed(1)
-    : '0'
+  const avgDelayDays =
+    delays.length > 0
+      ? (delays.reduce((s, r) => s + r.delay_days, 0) / delays.length).toFixed(1)
+      : '0'
 
   return {
-    overallHealth: (done / total) >= 0.8 ? 'Good' as const : 'Needs Attention' as const,
+    overallHealth: done / total >= 0.8 ? ('Good' as const) : ('Needs Attention' as const),
     completionRate,
     onTimeRate,
     totalRescues: rescueStore.records.length,
@@ -71,7 +81,7 @@ const executiveSummary = computed(() => {
     attendanceRate: '—',
     vsPrev: {
       completionChange: `${completionRate}`,
-      completionUp: (done / total) >= 0.5,
+      completionUp: done / total >= 0.5,
       onTimeChange: `${onTimeRate}`,
       onTimeUp: +onTimeRate.replace('%', '') >= 75,
       rescueChange: `-${Math.min(rescueStore.records.length, 5)}`,
@@ -99,7 +109,7 @@ const topPerformers = computed(() => {
     .map(([name, data]) => ({
       name,
       completion: data.total > 0 ? +((data.done / data.total) * 100).toFixed(1) : 0,
-      trend: `+${(data.done / Math.max(data.total, 1) * 3).toFixed(1)}%`,
+      trend: `+${((data.done / Math.max(data.total, 1)) * 3).toFixed(1)}%`,
     }))
     .sort((a, b) => b.completion - a.completion)
     .slice(0, 3)
@@ -507,4 +517,3 @@ function handleExport() {
   }
 }
 </style>
-

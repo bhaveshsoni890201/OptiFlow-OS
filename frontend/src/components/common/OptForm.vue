@@ -4,7 +4,16 @@ import OptInput from './OptInput.vue'
 import OptSelect from './OptSelect.vue'
 import OptButton from './OptButton.vue'
 
-export type FieldType = 'text' | 'email' | 'tel' | 'number' | 'password' | 'select' | 'textarea' | 'date' | 'file'
+export type FieldType =
+  | 'text'
+  | 'email'
+  | 'tel'
+  | 'number'
+  | 'password'
+  | 'select'
+  | 'textarea'
+  | 'date'
+  | 'file'
 
 export interface FormField {
   key: string
@@ -108,21 +117,29 @@ function colSpan(field: FormField): string {
 
 <template>
   <form class="opt-form" @submit.prevent="handleSubmit">
-    <div
-      v-if="$slots.beforeFields"
-    >
+    <div v-if="$slots.beforeFields">
       <slot name="beforeFields" />
     </div>
 
     <div :class="['grid grid-cols-1 gap-4', gridCols]">
-      <div
-        v-for="field in fields"
-        :key="field.key"
-        :class="colSpan(field)"
-      >
+      <div v-for="field in fields" :key="field.key" :class="colSpan(field)">
         <OptInput
-          v-if="field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'number' || field.type === 'password'"
-          :type="field.type === 'number' ? 'number' : field.type === 'tel' ? 'tel' : field.type === 'password' ? 'password' : 'text'"
+          v-if="
+            field.type === 'text' ||
+            field.type === 'email' ||
+            field.type === 'tel' ||
+            field.type === 'number' ||
+            field.type === 'password'
+          "
+          :type="
+            field.type === 'number'
+              ? 'number'
+              : field.type === 'tel'
+                ? 'tel'
+                : field.type === 'password'
+                  ? 'password'
+                  : 'text'
+          "
           :label="field.label"
           :model-value="modelValue[field.key] ?? ''"
           :placeholder="field.placeholder"
@@ -159,7 +176,9 @@ function colSpan(field: FormField): string {
             :required="field.required"
             :aria-invalid="!!errors[field.key]"
             class="w-full h-24 px-3 py-2.5 text-body text-neutral-900 bg-white border rounded-md transition-colors placeholder:text-neutral-400 disabled:bg-neutral-100 disabled:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 resize-y"
-            :class="errors[field.key] ? 'border-danger-500 focus:ring-danger-500' : 'border-neutral-300'"
+            :class="
+              errors[field.key] ? 'border-danger-500 focus:ring-danger-500' : 'border-neutral-300'
+            "
             @input="(e) => handleInput(field, (e.target as HTMLTextAreaElement).value)"
             @blur="() => handleBlur(field)"
           />
@@ -200,16 +219,34 @@ function colSpan(field: FormField): string {
             class="border-2 border-dashed border-neutral-300 rounded-lg px-4 py-6 text-center hover:border-brand-400 transition-colors cursor-pointer"
             @click="($refs as any)[`file-${field.key}`]?.click()"
             @dragover.prevent
-            @drop.prevent="(e: DragEvent) => { const files = e.dataTransfer?.files; if (files?.length) handleInput(field, files[0]) }"
+            @drop.prevent="
+              (e: DragEvent) => {
+                const files = e.dataTransfer?.files
+                if (files?.length) handleInput(field, files[0])
+              }
+            "
           >
             <input
-              :ref="(el: any) => { if (el) { const input = el as HTMLInputElement; input.onchange = () => { if (input.files?.length) handleInput(field, input.files[0]) } } }"
+              :ref="
+                (el: any) => {
+                  if (el) {
+                    const input = el as HTMLInputElement
+                    input.onchange = () => {
+                      if (input.files?.length) handleInput(field, input.files[0])
+                    }
+                  }
+                }
+              "
               type="file"
               class="hidden"
               :accept="'image/*,.pdf,.doc,.docx'"
             />
             <p class="text-body text-neutral-500">
-              {{ modelValue[field.key] instanceof File ? (modelValue[field.key] as File).name : 'Drag & drop or click to upload' }}
+              {{
+                (modelValue[field.key] as any)?.name
+                  ? (modelValue[field.key] as any).name
+                  : 'Drag & drop or click to upload'
+              }}
             </p>
             <p class="text-caption text-neutral-400 mt-1">JPG, PNG, PDF up to 5MB</p>
           </div>
@@ -220,10 +257,7 @@ function colSpan(field: FormField): string {
       </div>
     </div>
 
-    <div
-      v-if="$slots.afterFields"
-      class="mt-4"
-    >
+    <div v-if="$slots.afterFields" class="mt-4">
       <slot name="afterFields" />
     </div>
 
@@ -241,13 +275,10 @@ function colSpan(field: FormField): string {
         >
           {{ cancelLabel }}
         </OptButton>
-        <OptButton
-          variant="primary"
-          type="submit"
-          :loading="loading"
-        >
+        <OptButton variant="primary" type="submit" :loading="loading">
           {{ submitLabel }}
         </OptButton>
       </slot>
     </div>
   </form>
+</template>

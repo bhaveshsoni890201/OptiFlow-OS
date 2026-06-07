@@ -9,7 +9,7 @@ class NotificationService extends BaseService {
     return this.fetchList<Notification>(
       endpoints.notifications.list,
       async () => {
-        const { notifications } = await import('../mock/rescue')
+        const { notifications } = await import('../mock/notifications')
         return notifications
       },
       'notification:list',

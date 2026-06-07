@@ -81,15 +81,22 @@ const {
 
 watch(ticketList, () => ticketsGoTo(1))
 
-const categories: string[] = ['Software Bug', 'Network Issue', 'Equipment', 'Training', 'HR', 'Other']
+const categories: string[] = [
+  'Software Bug',
+  'Network Issue',
+  'Equipment',
+  'Training',
+  'HR',
+  'Other',
+]
 
 const categoryKeyMap: Record<string, string> = {
   'Software Bug': 'softwareBug',
   'Network Issue': 'networkIssue',
-  'Equipment': 'equipment',
-  'Training': 'training',
-  'HR': 'hr',
-  'Other': 'other'
+  Equipment: 'equipment',
+  Training: 'training',
+  HR: 'hr',
+  Other: 'other',
 }
 
 function categoryDisplay(cat: string): string {
@@ -111,7 +118,8 @@ function openRaiseForm() {
 async function submitTicket() {
   formErrors.value = {}
   error.value = ''
-  if (!formCategory.value) formErrors.value['category'] = t('helpTickets.validation.categoryRequired')
+  if (!formCategory.value)
+    formErrors.value['category'] = t('helpTickets.validation.categoryRequired')
   if (!formSubject.value.trim()) {
     formErrors.value['subject'] = t('helpTickets.validation.subjectRequired')
   } else if (formSubject.value.trim().length < 3) {
@@ -119,7 +127,8 @@ async function submitTicket() {
   } else if (formSubject.value.length > 200) {
     formErrors.value['subject'] = t('helpTickets.validation.subjectMaxLength')
   }
-  if (!formDescription.value.trim()) formErrors.value['description'] = t('helpTickets.validation.descriptionRequired')
+  if (!formDescription.value.trim())
+    formErrors.value['description'] = t('helpTickets.validation.descriptionRequired')
   if (Object.keys(formErrors.value).length > 0) return
   const newTicket: Partial<HelpTicket> = {
     id: `TKT-${Date.now()}`,
@@ -247,6 +256,12 @@ function formatRelativeTimeOverride(dateStr: string): string {
 function formatDateShortOverride(dateStr: string): string {
   return formatRelativeTime(dateStr)
 }
+
+function handleReopen() {
+  if (!selectedTicket.value) return
+  ticketStore.reopenTicket(selectedTicket.value.id)
+  closeDetail()
+}
 </script>
 
 <template>
@@ -261,35 +276,45 @@ function formatDateShortOverride(dateStr: string): string {
     </button>
   </div>
 
-   <!-- Loading state -->
-   <div v-if="loading" class="space-y-3" aria-live="polite">
-     <OptSkeleton variant="rectangular" height="80px" />
-     <OptSkeleton variant="rectangular" height="80px" />
-     <OptSkeleton variant="rectangular" height="80px" />
-   </div>
+  <!-- Loading state -->
+  <div v-if="loading" class="space-y-3" aria-live="polite">
+    <OptSkeleton variant="rectangular" height="80px" />
+    <OptSkeleton variant="rectangular" height="80px" />
+    <OptSkeleton variant="rectangular" height="80px" />
+  </div>
 
-   <!-- Error state -->
-   <div v-else-if="error" class="bg-white rounded-lg shadow-card p-8 text-center" role="alert" aria-live="polite">
-     <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
-     <p class="text-body-strong text-neutral-900 mb-1">{{ $t('helpTickets.error.somethingWentWrong') }}</p>
-     <p class="text-body text-neutral-500">{{ error }}</p>
-     <div class="flex items-center gap-2">
-       <button
-         class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
-         @click="retry"
-       >
-         {{ $t('common.retry') }}
-       </button>
-       <button
-         class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
-         @click="error = ''"
-       >
-         {{ $t('helpTickets.error.dismiss') }}
-       </button>
-     </div>
-   </div>
+  <!-- Error state -->
+  <div
+    v-else-if="error"
+    class="bg-white rounded-lg shadow-card p-8 text-center"
+    role="alert"
+    aria-live="polite"
+  >
+    <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
+    <p class="text-body-strong text-neutral-900 mb-1">
+      {{ $t('helpTickets.error.somethingWentWrong') }}
+    </p>
+    <p class="text-body text-neutral-500">{{ error }}</p>
+    <div class="flex items-center gap-2">
+      <button
+        class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
+        @click="retry"
+      >
+        {{ $t('common.retry') }}
+      </button>
+      <button
+        class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
+        @click="error = ''"
+      >
+        {{ $t('helpTickets.error.dismiss') }}
+      </button>
+    </div>
+  </div>
 
-  <div v-else-if="ticketStore.tickets.length === 0" class="bg-white rounded-lg shadow-card p-8 text-center">
+  <div
+    v-else-if="ticketStore.tickets.length === 0"
+    class="bg-white rounded-lg shadow-card p-8 text-center"
+  >
     <ChatBubbleLeftEllipsisIcon class="h-12 w-12 text-neutral-300 mx-auto mb-3" />
     <p class="text-body-strong text-neutral-900 mb-1">{{ $t('helpTickets.noTickets') }}</p>
     <p class="text-body text-neutral-500">
@@ -323,10 +348,16 @@ function formatDateShortOverride(dateStr: string): string {
           <h3 class="text-body-strong text-neutral-900 mb-1">{{ t.subject }}</h3>
           <div class="flex items-center gap-3 text-caption text-neutral-400">
             <span class="flex items-center gap-1"
-              ><ClockIcon class="h-3.5 w-3.5" /> {{ $t('helpTickets.raisedDate', { date: formatDateShortOverride(t.created_on) }) }}</span
+              ><ClockIcon class="h-3.5 w-3.5" />
+              {{
+                $t('helpTickets.raisedDate', { date: formatDateShortOverride(t.created_on) })
+              }}</span
             >
             <span class="flex items-center gap-1"
-              ><ArrowPathIcon class="h-3.5 w-3.5" /> {{ $t('helpTickets.updatedDate', { date: formatDateShortOverride(t.updated_on) }) }}</span
+              ><ArrowPathIcon class="h-3.5 w-3.5" />
+              {{
+                $t('helpTickets.updatedDate', { date: formatDateShortOverride(t.updated_on) })
+              }}</span
             >
             <span v-if="t.comments.length" class="flex items-center gap-1"
               ><ChatBubbleLeftEllipsisIcon class="h-3.5 w-3.5" /> {{ t.comments.length }}</span
@@ -338,13 +369,13 @@ function formatDateShortOverride(dateStr: string): string {
     </div>
   </div>
 
-    <OptPagination
-      :current-page="ticketsCurrentPage"
-      :total-pages="ticketsTotalPages"
-      :total-items="ticketsTotalItems"
-      :page-size="20"
-      @page-change="ticketsCurrentPage = $event"
-    />
+  <OptPagination
+    :current-page="ticketsCurrentPage"
+    :total-pages="ticketsTotalPages"
+    :total-items="ticketsTotalItems"
+    :page-size="20"
+    @page-change="ticketsCurrentPage = $event"
+  />
 
   <teleport to="body">
     <div
@@ -354,14 +385,16 @@ function formatDateShortOverride(dateStr: string): string {
     >
       <div
         class="bg-white w-full sm:max-w-lg rounded-t-xl sm:rounded-lg shadow-modal max-h-[90vh] overflow-y-auto animate-slide-up"
-        role="dialog" aria-modal="true" aria-label="Raise a Ticket"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Raise a Ticket"
       >
         <div class="flex items-center justify-between p-4 border-b border-neutral-100">
           <h2 class="text-h3 text-neutral-900">{{ $t('helpTickets.form.title') }}</h2>
           <button
             class="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400"
-            @click="showRaiseForm = false"
             aria-label="Close"
+            @click="showRaiseForm = false"
           >
             <XMarkIcon class="h-5 w-5" />
           </button>
@@ -369,7 +402,9 @@ function formatDateShortOverride(dateStr: string): string {
 
         <div v-if="formSubmitted" class="p-6 text-center">
           <CheckCircleSolid class="h-12 w-12 text-success-600 mx-auto mb-3" />
-          <p class="text-body-strong text-neutral-900 mb-1">{{ $t('helpTickets.success.title') }}</p>
+          <p class="text-body-strong text-neutral-900 mb-1">
+            {{ $t('helpTickets.success.title') }}
+          </p>
           <p class="text-body text-neutral-500 mb-4">
             {{ $t('helpTickets.success.detail') }}
           </p>
@@ -387,16 +422,20 @@ function formatDateShortOverride(dateStr: string): string {
               >{{ $t('helpTickets.form.category') }} <span class="text-danger-500">*</span></label
             >
             <select
+              :id="'input-category'"
               v-model="formCategory"
               class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
               :class="formErrors['category'] ? 'border-danger-500' : ''"
-              :id="'input-category'"
               :aria-describedby="formErrors['category'] ? 'error-category' : undefined"
             >
               <option value="">{{ $t('helpTickets.form.categoryPlaceholder') }}</option>
               <option v-for="c in categories" :key="c" :value="c">{{ categoryDisplay(c) }}</option>
             </select>
-            <p v-if="formErrors['category']" class="text-caption text-danger-600 mt-1" :id="'error-category'">
+            <p
+              v-if="formErrors['category']"
+              :id="'error-category'"
+              class="text-caption text-danger-600 mt-1"
+            >
               {{ formErrors['category'] }}
             </p>
           </div>
@@ -419,41 +458,50 @@ function formatDateShortOverride(dateStr: string): string {
               >{{ $t('helpTickets.form.subject') }} <span class="text-danger-500">*</span></label
             >
             <input
+              :id="'input-subject'"
               v-model="formSubject"
               type="text"
               :placeholder="$t('helpTickets.form.subjectPlaceholder')"
               class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none"
               :class="formErrors['subject'] ? 'border-danger-500' : ''"
-              :id="'input-subject'"
               :aria-describedby="formErrors['subject'] ? 'error-subject' : undefined"
             />
-            <p v-if="formErrors['subject']" class="text-caption text-danger-600 mt-1" :id="'error-subject'">
+            <p
+              v-if="formErrors['subject']"
+              :id="'error-subject'"
+              class="text-caption text-danger-600 mt-1"
+            >
               {{ formErrors['subject'] }}
             </p>
           </div>
 
           <div>
             <label class="block text-caption font-semibold text-neutral-700 mb-1"
-              >{{ $t('helpTickets.form.description') }} <span class="text-danger-500">*</span></label
+              >{{ $t('helpTickets.form.description') }}
+              <span class="text-danger-500">*</span></label
             >
             <textarea
+              :id="'input-description'"
               v-model="formDescription"
               rows="4"
               class="w-full px-3 py-2.5 border border-neutral-300 rounded-lg text-body text-neutral-900 focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none resize-none"
               :class="formErrors['description'] ? 'border-danger-500' : ''"
               :placeholder="$t('helpTickets.form.descriptionPlaceholder')"
-              :id="'input-description'"
               :aria-describedby="formErrors['description'] ? 'error-description' : undefined"
             />
-            <p v-if="formErrors['description']" class="text-caption text-danger-600 mt-1" :id="'error-description'">
+            <p
+              v-if="formErrors['description']"
+              :id="'error-description'"
+              class="text-caption text-danger-600 mt-1"
+            >
               {{ formErrors['description'] }}
             </p>
           </div>
 
           <div>
-            <label class="block text-caption font-semibold text-neutral-700 mb-1"
-              >{{ $t('helpTickets.form.attachments') }}</label
-            >
+            <label class="block text-caption font-semibold text-neutral-700 mb-1">{{
+              $t('helpTickets.form.attachments')
+            }}</label>
             <label
               class="flex items-center gap-2 px-3 py-2.5 border border-dashed border-neutral-300 rounded-lg cursor-pointer hover:bg-neutral-50 text-body text-neutral-500"
             >
@@ -478,8 +526,8 @@ function formatDateShortOverride(dateStr: string): string {
                 >
                 <button
                   class="text-neutral-400 hover:text-danger-600"
-                  @click="removeAttachment(idx)"
                   aria-label="Remove attachment"
+                  @click="removeAttachment(idx)"
                 >
                   <XMarkIcon class="h-3.5 w-3.5" />
                 </button>
@@ -506,7 +554,9 @@ function formatDateShortOverride(dateStr: string): string {
     >
       <div
         class="bg-white w-full sm:max-w-2xl rounded-t-xl sm:rounded-lg shadow-modal max-h-[90vh] overflow-y-auto animate-slide-up"
-        role="dialog" aria-modal="true" aria-label="Ticket detail"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Ticket detail"
       >
         <div
           class="sticky top-0 bg-white z-10 flex items-center justify-between p-4 border-b border-neutral-100"
@@ -521,8 +571,8 @@ function formatDateShortOverride(dateStr: string): string {
           </div>
           <button
             class="p-1.5 rounded-lg hover:bg-neutral-100 text-neutral-400 flex-shrink-0"
-            @click="closeDetail"
             aria-label="Close"
+            @click="closeDetail"
           >
             <XMarkIcon class="h-5 w-5" />
           </button>
@@ -533,11 +583,19 @@ function formatDateShortOverride(dateStr: string): string {
             <span>{{ categoryDisplay(selectedTicket.category) }}</span>
             <span>·</span>
             <span class="flex items-center gap-1"
-              ><ClockIcon class="h-3.5 w-3.5" /> {{ $t('helpTickets.raisedDate', { date: formatDateTime(selectedTicket.created_on) }) }}</span
+              ><ClockIcon class="h-3.5 w-3.5" />
+              {{
+                $t('helpTickets.raisedDate', { date: formatDateTime(selectedTicket.created_on) })
+              }}</span
             >
             <span>·</span>
             <span class="flex items-center gap-1"
-              ><ArrowPathIcon class="h-3.5 w-3.5" /> {{ $t('helpTickets.updatedDate', { date: formatDateShortOverride(selectedTicket.updated_on) }) }}</span
+              ><ArrowPathIcon class="h-3.5 w-3.5" />
+              {{
+                $t('helpTickets.updatedDate', {
+                  date: formatDateShortOverride(selectedTicket.updated_on),
+                })
+              }}</span
             >
           </div>
 
@@ -571,13 +629,18 @@ function formatDateShortOverride(dateStr: string): string {
 
           <!-- Reopen (within 7 days of close) -->
           <div
-            v-if="selectedTicket.status === 'closed' && (Date.now() - new Date(selectedTicket.updated_on).getTime()) < 7 * 24 * 60 * 60 * 1000"
+            v-if="
+              selectedTicket.status === 'closed' &&
+              Date.now() - new Date(selectedTicket.updated_on).getTime() < 7 * 24 * 60 * 60 * 1000
+            "
             class="flex items-center justify-between px-3 py-2.5 rounded-lg bg-amber-50 border border-amber-200"
           >
-            <span class="text-caption text-amber-700">This ticket is closed. You can reopen it within 7 days.</span>
+            <span class="text-caption text-amber-700"
+              >This ticket is closed. You can reopen it within 7 days.</span
+            >
             <button
               class="px-3 py-1.5 rounded-lg bg-amber-600 text-white text-caption font-medium hover:bg-amber-700 transition-colors"
-              @click="ticketStore.reopenTicket(selectedTicket.id); closeDetail()"
+              @click="handleReopen"
             >
               Reopen
             </button>
@@ -585,17 +648,23 @@ function formatDateShortOverride(dateStr: string): string {
 
           <!-- Satisfaction Survey -->
           <div
-            v-if="(selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') && !selectedTicket.satisfaction_score"
+            v-if="
+              (selectedTicket.status === 'resolved' || selectedTicket.status === 'closed') &&
+              !selectedTicket.satisfaction_score
+            "
             class="px-3 py-2.5 rounded-lg bg-brand-50 border border-brand-200"
           >
             <p class="text-caption font-semibold text-brand-700 mb-2">Rate your experience</p>
             <div class="flex items-center gap-2">
               <button
-                v-for="score in 5" :key="score"
+                v-for="score in 5"
+                :key="score"
                 class="w-8 h-8 rounded-full text-sm font-bold transition-colors"
-                :class="selectedTicket.satisfaction_score && selectedTicket.satisfaction_score >= score
-                  ? 'bg-brand-600 text-white'
-                  : 'bg-white text-brand-600 border border-brand-200 hover:bg-brand-100'"
+                :class="
+                  selectedTicket.satisfaction_score && selectedTicket.satisfaction_score >= score
+                    ? 'bg-brand-600 text-white'
+                    : 'bg-white text-brand-600 border border-brand-200 hover:bg-brand-100'
+                "
                 @click="ticketStore.submitSatisfaction(selectedTicket.id, score)"
               >
                 {{ score }}
@@ -608,7 +677,11 @@ function formatDateShortOverride(dateStr: string): string {
               {{ $t('helpTickets.commentsCount', { count: selectedTicket.comments.length }) }}
             </h3>
 
-            <OptEmptyState v-if="selectedTicket.comments.length === 0" type="comments" :title="$t('helpTickets.noComments')" />
+            <OptEmptyState
+              v-if="selectedTicket.comments.length === 0"
+              type="comments"
+              :title="$t('helpTickets.noComments')"
+            />
 
             <div class="space-y-3 max-h-48 overflow-y-auto mb-3">
               <div v-for="c in selectedTicket.comments" :key="c.id" class="flex gap-2.5">
@@ -625,7 +698,9 @@ function formatDateShortOverride(dateStr: string): string {
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2">
-                    <span class="text-body-strong text-neutral-900 text-[13px]">{{ c.author }}</span>
+                    <span class="text-body-strong text-neutral-900 text-[13px]">{{
+                      c.author
+                    }}</span>
                     <span class="text-caption text-neutral-400">{{
                       formatDateShortOverride(c.created_on)
                     }}</span>

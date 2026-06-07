@@ -38,12 +38,19 @@ const captains = computed<Captain[]>(() =>
       id: e.employee_id,
       name: e.name,
       teamSize: adminStore.employees.filter((x) => x.reporting_captain === e.employee_id).length,
-      rescueReduction: `${20 + (i * 3) % 15}%`,
-      recoverySpeed: `${(2 + (i * 0.3) % 2).toFixed(1)}h`,
-      teamEfficiency: 75 + (i * 4) % 20,
-      compositeIndex: 70 + (i * 5) % 25,
+      rescueReduction: `${20 + ((i * 3) % 15)}%`,
+      recoverySpeed: `${(2 + ((i * 0.3) % 2)).toFixed(1)}h`,
+      teamEfficiency: 75 + ((i * 4) % 20),
+      compositeIndex: 70 + ((i * 5) % 25),
       wowTrend: (['up', 'up', 'stable', 'up', 'down', 'up'] as const)[i % 6],
-      trendValue: [`+${2 + i * 1.5}`, `+${1 + i}`, `+0.${i + 2}`, `+${4 + i}`, `-${i + 1}.3`, `+${1 + i * 2}`][i % 6],
+      trendValue: [
+        `+${2 + i * 1.5}`,
+        `+${1 + i}`,
+        `+0.${i + 2}`,
+        `+${4 + i}`,
+        `-${i + 1}.3`,
+        `+${1 + i * 2}`,
+      ][i % 6],
     })),
 )
 
@@ -145,7 +152,10 @@ const maxChart = computed(() => {
       </button>
     </div>
 
-    <div v-else-if="!loading && sortedCaptains.length === 0" class="text-center py-20 bg-white rounded-lg border border-slate-200">
+    <div
+      v-else-if="!loading && sortedCaptains.length === 0"
+      class="text-center py-20 bg-white rounded-lg border border-slate-200"
+    >
       <UserGroupIcon class="h-14 w-14 text-slate-300 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-slate-700 mb-1">No captains found</h3>
       <p class="text-sm text-slate-400">No employees with captain role assigned yet.</p>
@@ -338,7 +348,7 @@ const maxChart = computed(() => {
               <h4 class="text-sm font-semibold text-gray-900 mb-3">Rescue Trend</h4>
               <div class="flex items-end gap-2 h-28">
                 <div
-                    v-for="(val, i) in (detailData[expandedCaptain || '']?.rescueTrend || [])"
+                  v-for="(val, i) in detailData[expandedCaptain || '']?.rescueTrend || []"
                   :key="i"
                   class="flex-1 flex flex-col items-center"
                 >
@@ -354,7 +364,7 @@ const maxChart = computed(() => {
               <h4 class="text-sm font-semibold text-gray-900 mb-3">Efficiency Trend</h4>
               <div class="flex items-end gap-2 h-28">
                 <div
-                    v-for="(val, i) in (detailData[expandedCaptain || '']?.efficiencyTrend || [])"
+                  v-for="(val, i) in detailData[expandedCaptain || '']?.efficiencyTrend || []"
                   :key="i"
                   class="flex-1 flex flex-col items-center"
                 >

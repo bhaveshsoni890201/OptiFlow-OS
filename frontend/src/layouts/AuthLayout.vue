@@ -28,11 +28,7 @@ function switchLang(lang: Language) {
     >
       <div class="max-w-md">
         <div class="mb-6">
-          <img
-            :src="brandLogo"
-            alt="OptiFlow OS Logo"
-            class="h-10 w-auto"
-          />
+          <img :src="brandLogo" alt="OptiFlow OS Logo" class="h-10 w-auto" />
         </div>
         <h2 class="text-3xl font-bold text-gray-900 mb-3">OptiFlow OS</h2>
         <p class="text-lg text-gray-600 leading-relaxed">
@@ -47,11 +43,7 @@ function switchLang(lang: Language) {
     >
       <div class="w-full max-w-sm">
         <div class="text-center mb-8 lg:hidden">
-          <img
-            :src="brandLogo"
-            alt="OptiFlow OS Logo"
-            class="h-8 w-auto mx-auto mb-2"
-          />
+          <img :src="brandLogo" alt="OptiFlow OS Logo" class="h-8 w-auto mx-auto mb-2" />
           <h1 class="text-xl font-semibold text-gray-900">OptiFlow OS</h1>
         </div>
 

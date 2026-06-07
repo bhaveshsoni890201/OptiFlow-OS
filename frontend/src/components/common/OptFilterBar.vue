@@ -59,20 +59,25 @@ function toggleDropdown(key: string) {
 }
 
 function hasActiveFilters(): boolean {
-  return Object.values(props.modelValue).some((v) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0))
+  return Object.values(props.modelValue).some(
+    (v) => v != null && v !== '' && !(Array.isArray(v) && v.length === 0),
+  )
+}
+
+function handleSelectFilter(key: string, value: any) {
+  updateFilter(key, value)
+  openDropdown.value = null
 }
 </script>
 
 <template>
   <div :class="['flex flex-wrap items-center gap-2', compact ? '' : 'py-3']">
-    <div
-      v-for="filter in filters"
-      :key="filter.key"
-      class="relative"
-    >
+    <div v-for="filter in filters" :key="filter.key" class="relative">
       <!-- Search filter -->
       <div v-if="filter.type === 'search'" class="relative">
-        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+        <MagnifyingGlassIcon
+          class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none"
+        />
         <input
           :value="modelValue[filter.key] || ''"
           :placeholder="filter.placeholder || 'Search...'"
@@ -100,7 +105,12 @@ function hasActiveFilters(): boolean {
           class="inline-flex items-center gap-2 h-9 px-3 text-body bg-white border border-neutral-300 rounded-md hover:border-neutral-400 transition-colors whitespace-nowrap"
           :class="[modelValue[filter.key] ? 'text-neutral-900' : 'text-neutral-400']"
         >
-          <span>{{ modelValue[filter.key] ? filter.options?.find(o => o.value === modelValue[filter.key])?.label || modelValue[filter.key] : filter.label }}</span>
+          <span>{{
+            modelValue[filter.key]
+              ? filter.options?.find((o) => o.value === modelValue[filter.key])?.label ||
+                modelValue[filter.key]
+              : filter.label
+          }}</span>
           <ChevronDownIcon class="w-4 h-4 text-neutral-400" />
         </button>
         <div
@@ -112,8 +122,12 @@ function hasActiveFilters(): boolean {
             :key="opt.value"
             type="button"
             class="w-full text-left px-3 py-2 text-body hover:bg-neutral-50 transition-colors"
-            :class="[modelValue[filter.key] === opt.value ? 'text-brand-600 bg-brand-50 font-semibold' : 'text-neutral-700']"
-            @click="updateFilter(filter.key, opt.value); openDropdown = null"
+            :class="[
+              modelValue[filter.key] === opt.value
+                ? 'text-brand-600 bg-brand-50 font-semibold'
+                : 'text-neutral-700',
+            ]"
+            @click="handleSelectFilter(filter.key, opt.value)"
           >
             {{ opt.label }}
           </button>
@@ -131,7 +145,11 @@ function hasActiveFilters(): boolean {
           class="inline-flex items-center gap-2 h-9 px-3 text-body bg-white border border-neutral-300 rounded-md hover:border-neutral-400 transition-colors whitespace-nowrap"
           :class="[modelValue[filter.key]?.length ? 'text-neutral-900' : 'text-neutral-400']"
         >
-          <span>{{ modelValue[filter.key]?.length ? `${filter.label} (${modelValue[filter.key].length})` : filter.label }}</span>
+          <span>{{
+            modelValue[filter.key]?.length
+              ? `${filter.label} (${modelValue[filter.key].length})`
+              : filter.label
+          }}</span>
           <ChevronDownIcon class="w-4 h-4 text-neutral-400" />
         </button>
         <div
@@ -163,10 +181,7 @@ function hasActiveFilters(): boolean {
       </div>
 
       <!-- Date range filter -->
-      <div
-        v-else-if="filter.type === 'date-range'"
-        class="flex items-center gap-1"
-      >
+      <div v-else-if="filter.type === 'date-range'" class="flex items-center gap-1">
         <input
           type="date"
           :value="modelValue[`${filter.key}_from`] || ''"
@@ -196,10 +211,7 @@ function hasActiveFilters(): boolean {
       </button>
     </div>
 
-    <div
-      v-if="hasActiveFilters()"
-      class="flex flex-wrap items-center gap-1.5 w-full"
-    >
+    <div v-if="hasActiveFilters()" class="flex flex-wrap items-center gap-1.5 w-full">
       <template v-for="(value, key) in modelValue" :key="key">
         <OptChip
           v-if="value != null && value !== '' && !(Array.isArray(value) && value.length === 0)"

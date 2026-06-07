@@ -23,9 +23,7 @@ const error = ref<string | null>(null)
 const searchQuery = ref('')
 const selectedEmployeeIndex = ref(0)
 
-const doers = computed(() =>
-  adminStore.employees.filter((e) => e.roles.includes('doer')),
-)
+const doers = computed(() => adminStore.employees.filter((e) => e.roles.includes('doer')))
 
 const filteredEmployees = computed(() => {
   const all = doers.value.map((e) => ({
@@ -33,7 +31,12 @@ const filteredEmployees = computed(() => {
     name: e.name,
     role: e.designation || 'Doer',
     dept: e.department,
-    avatar: e.name.split(' ').map((s) => s[0]).join('').slice(0, 2).toUpperCase(),
+    avatar: e.name
+      .split(' ')
+      .map((s) => s[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase(),
   }))
   if (!searchQuery.value.trim()) return all
   const q = searchQuery.value.toLowerCase()
@@ -233,7 +236,7 @@ onMounted(loadEmployeeData)
           </div>
         </div>
 
-          <div v-if="selectedEmployee" class="lg:col-span-3 space-y-6">
+        <div v-if="selectedEmployee" class="lg:col-span-3 space-y-6">
           <div class="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm">
             <div class="flex items-start gap-4">
               <div

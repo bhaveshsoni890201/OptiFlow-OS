@@ -265,10 +265,7 @@ function formatDateTime(iso: string) {
       </select>
     </div>
 
-    <div
-      v-if="error"
-      class="bg-white rounded-xl border border-red-200 p-8 text-center"
-    >
+    <div v-if="error" class="bg-white rounded-xl border border-red-200 p-8 text-center">
       <ExclamationTriangleIcon class="w-14 h-14 text-red-300 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-red-700">Failed to load exceptions</h3>
       <p class="text-sm text-red-500 mt-1">{{ error }}</p>
@@ -345,4 +342,3 @@ function formatDateTime(iso: string) {
     </div>
   </div>
 </template>
-

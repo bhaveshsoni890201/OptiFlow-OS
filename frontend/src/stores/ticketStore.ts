@@ -1,59 +1,71 @@
-﻿
-import { defineStore } from 'pinia'
+﻿import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import type { HelpTicket } from '../types'
-import { getHelpTickets, addTicketComment, closeTicket, reopenTicket, assignTicket, escalateTicket } from '../services/ticketService'
+import {
+  getHelpTickets,
+  addTicketComment,
+  closeTicket,
+  reopenTicket,
+  assignTicket,
+  escalateTicket,
+} from '../services/ticketService'
 import { useNotificationStore } from './notificationStore'
 import { useAdminStore } from './adminStore'
 import { logger } from '../utils/logger'
 const categoryCaptainMap: Record<string, string> = {
-'Software Bug': 'EMP-0001',  'Network Issue': 'EMP-0001',  'Equipment': 'EMP-0003',  'Training': 'EMP-0003',  'HR': 'EMP-0001',  'Safety': 'EMP-0002',
+  'Software Bug': 'EMP-0001',
+  'Network Issue': 'EMP-0001',
+  Equipment: 'EMP-0003',
+  Training: 'EMP-0003',
+  HR: 'EMP-0001',
+  Safety: 'EMP-0002',
 }
 export const useTicketStore = defineStore('tickets', () => {
-const tickets = ref<HelpTicket[]>([])
-const loading = ref(false)
-const error = ref('')
-function setTickets(list: HelpTicket[]): void {
-tickets.value = list
-}
-async function fetchTickets(): Promise<void> {
-loading.value = true
-error.value = ''
-try {
-tickets.value = await getHelpTickets()
-} catch (e) {
-error.value = 'Failed to load tickets'
-logger.error('TicketStore', 'Failed to fetch tickets', e)
-} finally {
-loading.value = false
-}
-}
-function detectMentions(text: string): string[] {
-const mentions = text.match(/@(\w+\s?\w+)/g)
-if (!mentions) return []
-return mentions.map((m) => m.replace('@', '').trim())
-}
-function notifyMentioned(mentionedNames: string[], ticketId: string, author: string): void {
-if (mentionedNames.length === 0) return
-const adminStore = useAdminStore()
-const notifyStore = useNotificationStore()
-for (const name of mentionedNames) {
-    const emp = adminStore.employees.find(
-      (e) => e.name.toLowerCase().includes(name.toLowerCase()))
+  const tickets = ref<HelpTicket[]>([])
+  const loading = ref(false)
+  const error = ref('')
+  function setTickets(list: HelpTicket[]): void {
+    tickets.value = list
+  }
+  async function fetchTickets(): Promise<void> {
+    loading.value = true
+    error.value = ''
+    try {
+      tickets.value = await getHelpTickets()
+    } catch (e) {
+      error.value = 'Failed to load tickets'
+      logger.error('TicketStore', 'Failed to fetch tickets', e)
+    } finally {
+      loading.value = false
+    }
+  }
+  function detectMentions(text: string): string[] {
+    const mentions = text.match(/@(\w+\s?\w+)/g)
+    if (!mentions) return []
+    return mentions.map((m) => m.replace('@', '').trim())
+  }
+  function notifyMentioned(mentionedNames: string[], ticketId: string, author: string): void {
+    if (mentionedNames.length === 0) return
+    const adminStore = useAdminStore()
+    const notifyStore = useNotificationStore()
+    for (const name of mentionedNames) {
+      const emp = adminStore.employees.find((e) =>
+        e.name.toLowerCase().includes(name.toLowerCase()),
+      )
 
-if (emp) {
-      notifyStore.notifications.unshift({
-        id: `n-mention-${Date.now()}-${emp.employee_id}`,
-        type: 'ticket',
-        title: `You were mentioned by ${author}`,
-        context: `In ticket ${ticketId}`,
-        timestamp: new Date().toISOString(),
-        read: false,
-        link: `/captain/tickets`,
-      })
-}
-}
-}
+      if (emp) {
+        notifyStore.notifications.unshift({
+          id: `n-mention-${Date.now()}-${emp.employee_id}`,
+          type: 'ticket',
+          title: `You were mentioned by ${author}`,
+          context: `In ticket ${ticketId}`,
+          timestamp: new Date().toISOString(),
+          read: false,
+          link: `/captain/tickets`,
+        })
+      }
+    }
+  }
   async function addComment(ticketId: string, author: string, text: string): Promise<void> {
     const ticket = tickets.value.find((t) => t.id === ticketId)
     if (!ticket) return
@@ -63,7 +75,7 @@ if (emp) {
       id: `TKT-CM-NEW-${Date.now()}`,
       author,
       text,
-      created_on: new Date().toISOString()
+      created_on: new Date().toISOString(),
     })
     ticket.updated_on = new Date().toISOString()
     const mentions = detectMentions(text)
@@ -76,19 +88,19 @@ if (emp) {
       logger.error('TicketStore', 'Failed to sync comment', e)
     }
   }
-async function autoAssignByCategory(ticket: HelpTicket): Promise<void> {
-const captainId = categoryCaptainMap[ticket.category]
-if (captainId) {
-ticket.assigned_to = captainId
-ticket.status = 'in_review'
-ticket.updated_on = new Date().toISOString()
-try {
-await assignTicket(ticket.id, captainId)
-} catch (e) {
-logger.error('TicketStore', 'Failed to auto-assign ticket', e)
-}
-}
-}
+  async function autoAssignByCategory(ticket: HelpTicket): Promise<void> {
+    const captainId = categoryCaptainMap[ticket.category]
+    if (captainId) {
+      ticket.assigned_to = captainId
+      ticket.status = 'in_review'
+      ticket.updated_on = new Date().toISOString()
+      try {
+        await assignTicket(ticket.id, captainId)
+      } catch (e) {
+        logger.error('TicketStore', 'Failed to auto-assign ticket', e)
+      }
+    }
+  }
   async function resolveTicket(ticketId: string, resolutionNotes: string): Promise<void> {
     const ticket = tickets.value.find((t) => t.id === ticketId)
     if (!ticket) return
@@ -174,7 +186,7 @@ logger.error('TicketStore', 'Failed to auto-assign ticket', e)
       id: `TKT-CM-ESC-${Date.now()}`,
       author: 'System',
       text: `Escalated: ${reason}`,
-      created_on: new Date().toISOString()
+      created_on: new Date().toISOString(),
     })
     try {
       await escalateTicket(ticketId, reason)
@@ -185,24 +197,24 @@ logger.error('TicketStore', 'Failed to auto-assign ticket', e)
       logger.error('TicketStore', 'Failed to escalate ticket', e)
     }
   }
-async function submitSatisfaction(ticketId: string, score: number): Promise<void> {
-const ticket = tickets.value.find((t) => t.id === ticketId)
-if (!ticket) return
-ticket.satisfaction_score = score
-}
-return {
-tickets,
-loading,
-error,
-setTickets,
-fetchTickets,
-addComment,
-closeTicket: closeTicketAction,
-reopenTicket: reopenTicketAction,
-assignTicket: assignTicketAction,
-escalateTicket: escalateTicketAction,
-resolveTicket,
-autoAssignByCategory,
-submitSatisfaction,
-}
+  async function submitSatisfaction(ticketId: string, score: number): Promise<void> {
+    const ticket = tickets.value.find((t) => t.id === ticketId)
+    if (!ticket) return
+    ticket.satisfaction_score = score
+  }
+  return {
+    tickets,
+    loading,
+    error,
+    setTickets,
+    fetchTickets,
+    addComment,
+    closeTicket: closeTicketAction,
+    reopenTicket: reopenTicketAction,
+    assignTicket: assignTicketAction,
+    escalateTicket: escalateTicketAction,
+    resolveTicket,
+    autoAssignByCategory,
+    submitSatisfaction,
+  }
 })

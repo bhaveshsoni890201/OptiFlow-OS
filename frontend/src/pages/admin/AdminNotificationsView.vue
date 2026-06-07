@@ -49,7 +49,9 @@ async function fetchNotifications() {
     await notificationStore.fetch()
     if (timedOut.value) throw new Error('Request timed out')
   } catch {
-    error.value = timedOut.value ? 'Request timed out. Please try again.' : t('notificationsPage.loadError')
+    error.value = timedOut.value
+      ? 'Request timed out. Please try again.'
+      : t('notificationsPage.loadError')
   }
   clearLoadTimeout()
   loading.value = false
@@ -109,7 +111,11 @@ function markAsRead(id: string) {
     </div>
 
     <div class="max-w-content mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
-      <div class="flex gap-1 overflow-x-auto pb-1 scrollbar-none" role="tablist" aria-label="Notification categories">
+      <div
+        class="flex gap-1 overflow-x-auto pb-1 scrollbar-none"
+        role="tablist"
+        aria-label="Notification categories"
+      >
         <button
           v-for="tab in tabs"
           :key="tab.id"
@@ -138,7 +144,9 @@ function markAsRead(id: string) {
 
       <div v-else-if="error" role="alert" aria-live="polite" class="card p-8 text-center">
         <ExclamationTriangleIcon class="h-12 w-12 text-danger-400 mx-auto mb-3" />
-        <p class="text-body-strong text-neutral-900 mb-1">{{ $t('notificationsPage.failedToLoad') || 'Failed to load notifications' }}</p>
+        <p class="text-body-strong text-neutral-900 mb-1">
+          {{ $t('notificationsPage.failedToLoad') || 'Failed to load notifications' }}
+        </p>
         <p class="text-body text-neutral-500">{{ error }}</p>
         <button
           class="mt-3 px-5 py-2 bg-brand-600 text-white rounded-lg text-button hover:bg-brand-700 transition-colors"
@@ -150,7 +158,9 @@ function markAsRead(id: string) {
 
       <div v-else-if="filteredNotifications.length === 0" class="card p-8 text-center">
         <BellIcon class="h-12 w-12 text-neutral-300 mx-auto mb-3" />
-        <p class="text-body-strong text-neutral-500">{{ $t('notificationsPage.empty') || 'No notifications' }}</p>
+        <p class="text-body-strong text-neutral-500">
+          {{ $t('notificationsPage.empty') || 'No notifications' }}
+        </p>
       </div>
 
       <div v-else class="space-y-2">
@@ -168,10 +178,15 @@ function markAsRead(id: string) {
             <component :is="getTypeIcon(notification.type)" class="w-5 h-5" />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-body text-neutral-900 line-clamp-2" :class="{ 'font-semibold': !notification.read }">
+            <p
+              class="text-body text-neutral-900 line-clamp-2"
+              :class="{ 'font-semibold': !notification.read }"
+            >
               {{ notification.title }}
             </p>
-            <p class="text-caption text-neutral-400 mt-1">{{ formatDateTime(notification.timestamp) }}</p>
+            <p class="text-caption text-neutral-400 mt-1">
+              {{ formatDateTime(notification.timestamp) }}
+            </p>
           </div>
           <button
             v-if="!notification.read"

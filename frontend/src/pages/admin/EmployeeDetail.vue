@@ -57,7 +57,7 @@ const editForm = ref({
   designation: '',
   reporting_captain: '',
   roles: [] as Role[],
-  status: 'active' as 'active' | 'disabled',
+  status: 'active' as 'active' | 'disabled' | 'offboarded',
 })
 
 const formErrors = ref<Record<string, string>>({})
@@ -221,7 +221,11 @@ async function requestTransfer() {
     showTransferModal.value = false
     transferTarget.value = ''
     transferReason.value = ''
-    store.addToast({ type: 'success', message: 'Transfer submitted for admin approval', duration: 3000 })
+    store.addToast({
+      type: 'success',
+      message: 'Transfer submitted for admin approval',
+      duration: 3000,
+    })
   } catch (e) {
     error.value = 'Transfer failed'
   } finally {
@@ -236,7 +240,11 @@ async function offboardEmployee() {
     await adminStore.updateEmployee(employee.value.employee_id, { status: 'offboarded' })
     showOffboardModal.value = false
     offboardConfirm.value = ''
-    store.addToast({ type: 'success', message: `${employee.value.name} offboarded`, duration: 3000 })
+    store.addToast({
+      type: 'success',
+      message: `${employee.value.name} offboarded`,
+      duration: 3000,
+    })
     router.push('/admin/employees')
   } catch (e) {
     error.value = 'Offboarding failed'
@@ -258,10 +266,7 @@ async function offboardEmployee() {
       </div>
     </div>
 
-    <div
-      v-else-if="error"
-      class="bg-white rounded-xl border border-red-200 p-12 text-center"
-    >
+    <div v-else-if="error" class="bg-white rounded-xl border border-red-200 p-12 text-center">
       <ExclamationTriangleIcon class="w-14 h-14 text-red-300 mx-auto mb-4" />
       <h3 class="text-lg font-semibold text-slate-700 mb-1">Failed to load employee data</h3>
       <p class="text-sm text-slate-400 mb-4">{{ error }}</p>
@@ -641,7 +646,11 @@ async function offboardEmployee() {
                 <span class="text-blue-500">{{ row.leave }} leave</span>
               </div>
             </div>
-            <OptEmptyState v-if="attendanceSummary.length === 0" type="attendance" title="No attendance data" />
+            <OptEmptyState
+              v-if="attendanceSummary.length === 0"
+              type="attendance"
+              title="No attendance data"
+            />
           </div>
         </div>
 
@@ -698,7 +707,11 @@ async function offboardEmployee() {
               {{ t.status.replace('_', ' ') }}
             </span>
           </div>
-            <OptEmptyState v-if="trainingRecords.length === 0" type="training" title="No training records" />
+          <OptEmptyState
+            v-if="trainingRecords.length === 0"
+            type="training"
+            title="No training records"
+          />
         </div>
       </div>
 
@@ -727,7 +740,11 @@ async function offboardEmployee() {
               />
             </div>
           </div>
-            <OptEmptyState v-if="performanceReviews.length === 0" type="data" title="No reviews yet" />
+          <OptEmptyState
+            v-if="performanceReviews.length === 0"
+            type="data"
+            title="No reviews yet"
+          />
         </div>
       </div>
 
@@ -776,7 +793,9 @@ async function offboardEmployee() {
                 </select>
               </div>
               <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Reason (optional)</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1"
+                  >Reason (optional)</label
+                >
                 <input
                   v-model="transferReason"
                   class="w-full h-10 px-3 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

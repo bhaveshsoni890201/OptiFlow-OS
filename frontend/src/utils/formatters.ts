@@ -9,7 +9,7 @@ export function formatDate(date: string | Date): string {
 
 export function formatDateShort(date: string | Date): string {
   const d = toDate(date)
-  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
 }
 
 export function formatDateLong(date: string | Date): string {
@@ -19,7 +19,12 @@ export function formatDateLong(date: string | Date): string {
 
 export function formatDateWithWeekday(date: string | Date): string {
   const d = toDate(date)
-  return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('en-IN', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
 }
 
 export function formatDateShortNoYear(date: string | Date): string {
