@@ -15,7 +15,7 @@ import {
 import { getTrainingAssignments } from '../../services'
 import { useAdminStore } from '../../stores/adminStore'
 import OptEmptyState from '../../components/common/OptEmptyState.vue'
-import { formatDateShort, formatDate } from '../../utils/formatters'
+import { formatDateShort } from '../../utils/formatters'
 
 const adminStore = useAdminStore()
 

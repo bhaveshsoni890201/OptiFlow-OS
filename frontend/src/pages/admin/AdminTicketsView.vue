@@ -13,7 +13,7 @@ import { useTicketStore } from '../../stores/ticketStore'
 import type { HelpTicket } from '../../types'
 import { usePagination } from '../../composables/usePagination'
 import OptPagination from '../../components/common/OptPagination.vue'
-import { formatDateShort, formatDateTime } from '../../utils/formatters'
+import { formatDateShort } from '../../utils/formatters'
 
 const ticketStore = useTicketStore()
 

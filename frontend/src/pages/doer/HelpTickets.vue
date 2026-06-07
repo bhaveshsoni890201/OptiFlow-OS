@@ -238,7 +238,7 @@ function statusLabel(status: TicketStatus): string {
   }
 }
 
-import { formatRelativeTime, formatDateShort } from '../../utils/formatters'
+import { formatRelativeTime } from '../../utils/formatters'
 
 function formatRelativeTimeOverride(dateStr: string): string {
   return formatRelativeTime(dateStr)
